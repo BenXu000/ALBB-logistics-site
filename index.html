@@ -559,12 +559,6 @@
         { id: 'gulf56', label: '海湾物流', label_en: 'Gulf56' },
         { id: 'lxcn',   label: '立信诺',   label_en: 'Lxcn' }
     ];
-    // 承运商名称映射（auto 模式识别出承运商后在结果里显示）
-    const SOURCE_LABELS = {
-        ontask: ['国际专线', 'Intl Line'],
-        gulf56: ['海湾物流', 'Gulf56'],
-        lxcn:   ['立信诺',   'Lxcn']
-    };
     let currentTrackSource = 'auto'; // auto = 后端三站并发查询，自动匹配有数据的承运商
     function applyLanguage(lang) {
         document.querySelectorAll('[data-translate]').forEach(el => {
@@ -657,7 +651,6 @@
                 if (data.destination || data.voyNo) {
                     // 运单已登记但暂无轨迹明细（如 lxcn 只返回目的地）
                     let meta = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
-                    if (data.destination) meta += `　<span style="color:#5a7c5a;">${zh ? '目的地' : 'Dest'}: ${escapeHtml(data.destination)}</span>`;
                     meta += `</div><div style="color:#8a6d3b; background:#fdf6e3; padding:8px 14px; border-radius:20px; display:inline-block;">${zh ? '运单已登记，轨迹明细待更新' : 'Registered, track details pending'}</div>`;
                     resultDiv.innerHTML = meta;
                 } else {
@@ -667,12 +660,6 @@
             }
 
             let out = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
-            if (data.auto && SOURCE_LABELS[data.source]) {
-                out += `　<span style="color:#5a7c5a;">${zh ? '承运商' : 'Carrier'}: ${zh ? SOURCE_LABELS[data.source][0] : SOURCE_LABELS[data.source][1]}</span>`;
-            }
-            if (data.destination) {
-                out += `　<span style="color:#5a7c5a;">${zh ? '目的地' : 'Dest'}: ${escapeHtml(data.destination)}</span>`;
-            }
             if (data.voyNo) {
                 out += `　<span style="color:#5a7c5a;">${zh ? '航次' : 'Voyage'}: ${escapeHtml(data.voyNo)}</span>`;
             }
