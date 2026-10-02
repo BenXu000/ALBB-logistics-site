@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<html lang="zh-CN" data-page-node-id="WWfJEoCXOjvBUnRsALODDR">
+<head data-page-node-id="sTbXcBgCwamyQ5va6IYJfH">
+    <meta charset="UTF-8" data-page-node-id="Xv6ToM1LFk0ylEjRfK0wbO">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" data-page-node-id="HwGvfhjH5vDmMsbVLoea2k">
     <title>ALBB LOGISTICS | 中东专线物流解决方案</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" data-page-node-id="AGOe8chgbafn2Jv7DXePyP">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -279,82 +279,98 @@
         @media (max-width: 700px) {
             .responsive-stack { grid-template-columns: 1fr; }
         }
-    </style>
+        /* ===== 物流查询：站点切换标签 ===== */
+        .track-tabs {
+            display: flex; gap: 8px; justify-content: center;
+            margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .track-tab {
+            padding: 7px 20px; border: 1.5px solid #cfe3cf;
+            background: #fff; border-radius: 999px;
+            font-size: 0.9rem; color: #4a6b4a; cursor: pointer;
+            transition: all .2s; font-family: inherit;
+        }
+        .track-tab:hover { border-color: #4caf50; }
+        .track-tab.active {
+            background: #4caf50; border-color: #4caf50;
+            color: #fff; font-weight: 600;
+        }
+</style>
 </head>
-<body>
-<div class="truck-deco"><i class="fas fa-truck-fast"></i> <i class="fas fa-plane"></i> <i class="fas fa-ship"></i></div>
+<body data-page-node-id="y7DadUSHJfQw3X0wNEKbvK">
+<div class="truck-deco" data-page-node-id="WyketCRoVP5pBwyPOnHR9W"><i class="fas fa-truck-fast" data-page-node-id="kWx6jvELDlQbfIE8AymAEn"></i> <i class="fas fa-plane" data-page-node-id="v4un0OiQMNGH9FXdD9LxO7"></i> <i class="fas fa-ship" data-page-node-id="yur6lQq9XAqx2PpG53P2Wp"></i></div>
 
-<header class="header">
-    <div class="container header-inner">
-        <div class="logo">
-            <h1>ALBB LOGISTICS COMPANY</h1>
-            <span data-translate="slogan">中东专线 · 双清到门专家</span>
+<header class="header" data-page-node-id="MeVTC3i4jiAVLPoiRrSFH0">
+    <div class="container header-inner" data-page-node-id="Hej9e4lkETlifLd3rKVzDA">
+        <div class="logo" data-page-node-id="25BxoWqGxnaJiOXL9PTD3E">
+            <h1 data-page-node-id="tkcYEIJ68ArfpkfiAtZWvJ">ALBB LOGISTICS COMPANY</h1>
+            <span data-translate="slogan" data-page-node-id="F42FCJUTfJvixpcgOEtlmO">中东专线 · 双清到门专家</span>
         </div>
-        <div class="nav">
-            <a href="#services" data-translate="nav_services">我们的服务</a>
-            <a href="#tracking" data-translate="nav_tracking">运踪查询</a>
-            <a href="#advantages" data-translate="nav_advantages">核心优势</a>
-            <a href="#contact" data-translate="nav_contact">获取方案</a>
-            <div class="lang-switch" id="langToggle">English / 中文</div>
+        <div class="nav" data-page-node-id="D4o56Ub4QfEWNIeLbWmZsj">
+            <a href="#services" data-translate="nav_services" data-page-node-id="3iFGLvl2t87v1fvXnBJhu1">我们的服务</a>
+            <a href="#tracking" data-translate="nav_tracking" data-page-node-id="6CAXvYggRqMtt5EBCWSzIq">运踪查询</a>
+            <a href="#advantages" data-translate="nav_advantages" data-page-node-id="9Z8tUurqHcQL8gPmjGtfzD">核心优势</a>
+            <a href="#contact" data-translate="nav_contact" data-page-node-id="JafT0aFvBNOgMSl0lFAXML">获取方案</a>
+            <div class="lang-switch" id="langToggle" data-page-node-id="Fi7lyLbnCcBNHK8nSmIbqL">English / 中文</div>
         </div>
     </div>
 </header>
 
-<main>
+<main data-page-node-id="xqJzqC6WkK1wRrDkUQjlTa">
     <!-- Hero -->
-    <section style="padding: 50px 0 30px;">
-        <div class="container">
-            <div class="hero" style="max-width: 800px;">
-                <h1 style="font-weight: 800; color: #1e4620;" data-translate="hero_title">中东专线物流解决方案｜直达沙特与阿联酋</h1>
-                <p style="font-size: 1.2rem; margin: 24px 0 32px; color: #3c6e3c;" data-translate="hero_sub">专注双清到门服务，覆盖空运、海运及电商履约<br>通过发货前预审与全程运踪，提升运输稳定性与可控性</p>
-                <div class="hero-buttons" style="display: flex; gap: 20px; flex-wrap: wrap;">
-                    <a href="#contact" class="btn-primary" data-translate="btn_consult">了解运输方案</a>
-                    <a href="#services" class="btn-outline" data-translate="btn_details">查看服务详情</a>
+    <section style="padding: 50px 0 30px;" data-page-node-id="uK8wkCM9OZKiBWzJWSkGAo">
+        <div class="container" data-page-node-id="OKXOkcTmCm1rwxLJMsrKyB">
+            <div class="hero" style="max-width: 800px;" data-page-node-id="nTOn49kFxd0GhwcJtGJfYp">
+                <h1 style="font-weight: 800; color: #1e4620;" data-translate="hero_title" data-page-node-id="1AF3gvATgJ9RmW0wP3MgYh">中东专线物流解决方案｜直达沙特与阿联酋</h1>
+                <p style="font-size: 1.2rem; margin: 24px 0 32px; color: #3c6e3c;" data-translate="hero_sub" data-page-node-id="0z1HmbaKveXD5L2bM0ZbI4">专注双清到门服务，覆盖空运、海运及电商履约<br data-page-node-id="KnteCa7o7tGEkYhKrPHA8S">通过发货前预审与全程运踪，提升运输稳定性与可控性</p>
+                <div class="hero-buttons" style="display: flex; gap: 20px; flex-wrap: wrap;" data-page-node-id="k1lxV5dBMvOlWxXrF8hfzo">
+                    <a href="#contact" class="btn-primary" data-translate="btn_consult" data-page-node-id="KS2lGyI60AXP1C03fqrpFm">了解运输方案</a>
+                    <a href="#services" class="btn-outline" data-translate="btn_details" data-page-node-id="Qz4ddcnUBY8suzizSsFwdt">查看服务详情</a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- 1. 我们的服务 -->
-    <section id="services">
-        <div class="container">
-            <div class="section-title" data-translate="services_title">我们的服务</div>
-            <div class="section-sub" data-translate="services_sub">覆盖从发货前处理到末端交付的完整物流链路</div>
-            <div class="services-grid-special">
-                <div class="service-block">
-                    <h3><i class="fas fa-flag-checkered"></i> <span data-translate="saudi_title">沙特专线</span></h3>
-                    <ul>
-                        <li><i class="fas fa-plane"></i> <span data-translate="sa_air_ddp">空运双清到门</span></li>
-                        <li><i class="fas fa-plane"></i> <span data-translate="sa_air_airport">空运到机场</span></li>
-                        <li><i class="fas fa-ship"></i> <span data-translate="sa_sea_ddp">海运双清到门</span></li>
-                        <li><i class="fas fa-ship"></i> <span data-translate="sa_sea_fcl">海运整柜</span></li>
-                        <li><i class="fas fa-cubes"></i> <span data-translate="sa_sea_lcl">海运拼箱</span></li>
+    <section id="services" data-page-node-id="F9c3dWNZLPQi7ssyUxPojc">
+        <div class="container" data-page-node-id="iBJD9RqTJVb5BlFRrZHu1P">
+            <div class="section-title" data-translate="services_title" data-page-node-id="LkCGARU0nQmREECK9nDIpO">我们的服务</div>
+            <div class="section-sub" data-translate="services_sub" data-page-node-id="kHsqRIJiaIQWaVoIJL0pJ6">覆盖从发货前处理到末端交付的完整物流链路</div>
+            <div class="services-grid-special" data-page-node-id="3GPVhK7YRv2m8hxTKSeBny">
+                <div class="service-block" data-page-node-id="Y2GH4tbuN9ooqJyFED0P9P">
+                    <h3 data-page-node-id="s5tIsSgAkS92pIjBADyu9K"><i class="fas fa-flag-checkered" data-page-node-id="EUGwprLbLRCu6M2xHIFncz"></i> <span data-translate="saudi_title" data-page-node-id="p3jY651x2ms44fEOWpgHqc">沙特专线</span></h3>
+                    <ul data-page-node-id="YAFcIbtinwzXhJdcy9lUBS">
+                        <li data-page-node-id="Ep6MHOqFqyMCAeE9gdyhhO"><i class="fas fa-plane" data-page-node-id="qklE8zhyH71ND5ipnSsTcy"></i> <span data-translate="sa_air_ddp" data-page-node-id="zrO0Og5YotJBqQ5jCzsyz6">空运双清到门</span></li>
+                        <li data-page-node-id="Rn8LAxiZtKyF68jdpIVjfX"><i class="fas fa-plane" data-page-node-id="4WjGXDAddDoATk6yIxOCnO"></i> <span data-translate="sa_air_airport" data-page-node-id="lA0h8ustVCYeV4TW4a6iNz">空运到机场</span></li>
+                        <li data-page-node-id="sMSHIC3J4vR0CM1vv78xsq"><i class="fas fa-ship" data-page-node-id="B1wdtCLkAp0WGKtKbXOcFU"></i> <span data-translate="sa_sea_ddp" data-page-node-id="FplAHX8WrCBFD1ojkDJlQp">海运双清到门</span></li>
+                        <li data-page-node-id="m68HoJvZqeDgBTWzIszECf"><i class="fas fa-ship" data-page-node-id="Q7RSoPskSeF0hznddp6ynW"></i> <span data-translate="sa_sea_fcl" data-page-node-id="AXk3n0jZijXwQQyjAMCoGN">海运整柜</span></li>
+                        <li data-page-node-id="zotIV6bI7Hi6XjHvcFFAgs"><i class="fas fa-cubes" data-page-node-id="Kg5LH8OjgxoI6INXZsn3Qm"></i> <span data-translate="sa_sea_lcl" data-page-node-id="MBnitgp9Ow6fAb1uEAnwUJ">海运拼箱</span></li>
                     </ul>
                 </div>
-                <div class="service-block">
-                    <h3><i class="fas fa-flag-checkered"></i> <span data-translate="uae_title">阿联酋专线</span></h3>
-                    <ul>
-                        <li><i class="fas fa-plane"></i> <span data-translate="uae_air_ddp">空运双清到门</span></li>
-                        <li><i class="fas fa-plane"></i> <span data-translate="uae_air_airport">空运到机场</span></li>
-                        <li><i class="fas fa-ship"></i> <span data-translate="uae_sea_ddp">海运双清到门</span></li>
-                        <li><i class="fas fa-ship"></i> <span data-translate="uae_sea_fcl">海运整柜</span></li>
-                        <li><i class="fas fa-cubes"></i> <span data-translate="uae_sea_lcl">海运拼箱</span></li>
+                <div class="service-block" data-page-node-id="jngGl2feJ1LDvMTnyk4zJ1">
+                    <h3 data-page-node-id="ieEMhH5195VBnnZRcHVPMN"><i class="fas fa-flag-checkered" data-page-node-id="6PnG3AtOyw130opsrgalPi"></i> <span data-translate="uae_title" data-page-node-id="BXt4ySBhaLGEg6Uwqt7Eew">阿联酋专线</span></h3>
+                    <ul data-page-node-id="4RcQEN5qmTvOeAomIz5bDz">
+                        <li data-page-node-id="9QhiOH8yOxFxiLqr4TDbp9"><i class="fas fa-plane" data-page-node-id="uOo3N0SGgc2eVlx5xGZ0Jt"></i> <span data-translate="uae_air_ddp" data-page-node-id="mtU1uF9ijNCJ9RD3OEz9fk">空运双清到门</span></li>
+                        <li data-page-node-id="umVHnf5fivYv1gsIfDdo1c"><i class="fas fa-plane" data-page-node-id="0PouKApZWhzUOBBrWm4Li2"></i> <span data-translate="uae_air_airport" data-page-node-id="iCaEpF0AHDNrzghuilmJiY">空运到机场</span></li>
+                        <li data-page-node-id="HfnWJGvOIwsItkqLnkhu7q"><i class="fas fa-ship" data-page-node-id="LZ2xFWuORbyZj2IhdwImcV"></i> <span data-translate="uae_sea_ddp" data-page-node-id="1yuwn9lBxuEKkI6zpOMMMZ">海运双清到门</span></li>
+                        <li data-page-node-id="H1L3u4QTfzN6KRulhvzOPA"><i class="fas fa-ship" data-page-node-id="N7V0Wvb7A57cVQbFcFBs1A"></i> <span data-translate="uae_sea_fcl" data-page-node-id="S8po8HxjIyAPdLretNrxY6">海运整柜</span></li>
+                        <li data-page-node-id="9wcWZxugoDQ6UcMwvcIILQ"><i class="fas fa-cubes" data-page-node-id="1pyE3B6UKNFTo36tx3k1v1"></i> <span data-translate="uae_sea_lcl" data-page-node-id="bpF8AB5nUEa1fjU6FVAAdJ">海运拼箱</span></li>
                     </ul>
                 </div>
-                <div class="service-block">
-                    <h3><i class="fas fa-box-open"></i> <span data-translate="parcel_title">跨境小包 & FBA</span></h3>
-                    <ul>
-                        <li><i class="fas fa-truck"></i> <span data-translate="parcel_line">电商专线</span></li>
-                        <li><i class="fab fa-amazon"></i> <span data-translate="fba_sa_uae">沙特｜阿联酋亚马逊FBA送仓</span></li>
-                        <li><i class="fas fa-store"></i> <span data-translate="noon_sa_uae">沙特｜阿联酋NOON送仓</span></li>
+                <div class="service-block" data-page-node-id="4BOLknbDRjmUf7bA24G2hr">
+                    <h3 data-page-node-id="jVKEFbBXdkpWfVSkSCOgQX"><i class="fas fa-box-open" data-page-node-id="yUXKf46F161wHXQezkzMb6"></i> <span data-translate="parcel_title" data-page-node-id="StqJ6Tq9i9844Z32yNImk7">跨境小包 & FBA</span></h3>
+                    <ul data-page-node-id="QJFcntpnSn8bCDHY4rFwVn">
+                        <li data-page-node-id="rFXQL85iVUJ0RVnozjJDDo"><i class="fas fa-truck" data-page-node-id="xtAkwzKsCOCqPRHCxH6gUZ"></i> <span data-translate="parcel_line" data-page-node-id="SIEUL3BI9j1igQ0SFm5KaQ">电商专线</span></li>
+                        <li data-page-node-id="Q7vZofQ0bg6z4oFbJCyc8X"><i class="fab fa-amazon" data-page-node-id="GVjqkusOypQYjj128w17x4"></i> <span data-translate="fba_sa_uae" data-page-node-id="QGVOEeGAHN48swPTD51Pev">沙特｜阿联酋亚马逊FBA送仓</span></li>
+                        <li data-page-node-id="hA2Jf0qWVnP4dI7AIItU5o"><i class="fas fa-store" data-page-node-id="2EtzWwoqPWifaEt1mmrgB1"></i> <span data-translate="noon_sa_uae" data-page-node-id="4rgHYblbaYF6TSenAAJCLh">沙特｜阿联酋NOON送仓</span></li>
                     </ul>
                 </div>
-                <div class="service-block">
-                    <h3><i class="fas fa-hard-hat"></i> <span data-translate="project_title">工程物流/大件</span></h3>
-                    <ul>
-                        <li><i class="fas fa-cog"></i> <span data-translate="project_cargo">项目物资</span></li>
-                        <li><i class="fas fa-weight-hanging"></i> <span data-translate="oversized">超限货物</span></li>
-                        <li><i class="fas fa-passport"></i> <span data-translate="customs_clearance">全程物流清关方案</span></li>
+                <div class="service-block" data-page-node-id="5BpAoCD62GKvwpfqCe4W22">
+                    <h3 data-page-node-id="0lHb1Luet5ZBVesRixw0sF"><i class="fas fa-hard-hat" data-page-node-id="OdRX01zrj5gx2ZqwgJlvcw"></i> <span data-translate="project_title" data-page-node-id="XJs5iFcAznM3DJh6DcHbNQ">工程物流/大件</span></h3>
+                    <ul data-page-node-id="gR0EPDfopXctmZymSE1b99">
+                        <li data-page-node-id="qUTKeSMbZZA3jsuzFbqm9V"><i class="fas fa-cog" data-page-node-id="7EtOp3Ft9jO2CccXIrHoU0"></i> <span data-translate="project_cargo" data-page-node-id="XoKFCOHmuHppjjliSN9kpM">项目物资</span></li>
+                        <li data-page-node-id="n7F0TKzOgqfkzbdZqNvd9C"><i class="fas fa-weight-hanging" data-page-node-id="lVUk65G4lKAkJl0eEkxQo3"></i> <span data-translate="oversized" data-page-node-id="OL5AK5nBnp5NEhWuAxEmBr">超限货物</span></li>
+                        <li data-page-node-id="eq1ArLquwm5XiBVF41LOVX"><i class="fas fa-passport" data-page-node-id="bZFGPFqYFrK91CDR0vZxpk"></i> <span data-translate="customs_clearance" data-page-node-id="A2tCHNdV8TnynUXvT9hLFk">全程物流清关方案</span></li>
                     </ul>
                 </div>
             </div>
@@ -362,81 +378,82 @@
     </section>
 
     <!-- 2. 24小时在线查询 -->
-    <section id="tracking">
-        <div class="container">
-            <div class="track-section">
-                <div class="section-title" style="margin-bottom: 8px;" data-translate="track_title">📡 24小时在线查询</div>
-                <div class="section-sub" data-translate="track_sub">让您对货物了如指掌</div>
-                <div class="track-box">
-                    <input type="text" id="trackingNumber" placeholder="例如：ALBB123456789" autocomplete="off">
-                    <button id="trackBtn"><span data-translate="track_btn">查询运踪</span></button>
+    <section id="tracking" data-page-node-id="QD6gCAscYJc5WKvdehL9mn">
+        <div class="container" data-page-node-id="e0yw8AXczAVm8Rf52bzitp">
+            <div class="track-section" data-page-node-id="e8L5TIFbIwdDSLTxMbqBPm">
+                <div class="section-title" style="margin-bottom: 8px;" data-translate="track_title" data-page-node-id="ADSqNSIa4eDN9ASTRBT4NN">📡 24小时在线查询</div>
+                <div class="section-sub" data-translate="track_sub" data-page-node-id="QCAc7vdXIaeVkAhuqKJtlI">让您对货物了如指掌</div>
+                <div id="trackSourceTabs" class="track-tabs" data-page-node-id="5DQ49dStcmW53MZiBN7BUy"></div>
+                <div class="track-box" data-page-node-id="LK22E1zVASOiRamluSRscs">
+                    <input type="text" id="trackingNumber" placeholder="例如：ALBB123456789" autocomplete="off" data-page-node-id="tF575YF9NdBOPj2ByZOcXc">
+                    <button id="trackBtn" data-page-node-id="s6sTXK9RQFPWiIjSIWZp9B"><span data-translate="track_btn" data-page-node-id="N3EYzulqzSYeoVpbb5Yfz2">查询运踪</span></button>
                 </div>
-                <div id="trackResult" class="timeline-demo">
-                    <div style="text-align:center; color:#5a7c5a;"><i class="fas fa-search"></i> <span data-translate="track_default">输入运单号，查看模拟轨迹</span></div>
+                <div id="trackResult" class="timeline-demo" data-page-node-id="bcN0MOnoeRN9hghKQKH6Za">
+                    <div style="text-align:center; color:#5a7c5a;" data-page-node-id="fbmLYwUOHvD2258hZZVdnl"><i class="fas fa-search" data-page-node-id="QvWMXAsryEZG1A8Dbme0Aj"></i> <span data-translate="track_default" data-page-node-id="RGEwKaHwrt9FroOhV8STSv">输入运单号，查询实时轨迹</span></div>
                 </div>
-                <div class="demo-note" style="text-align:center; margin-top:15px; font-size:0.8rem;" data-translate="demo_note">演示数据，对接真实API后可显示实时物流</div>
+                <div class="demo-note" style="text-align:center; margin-top:15px; font-size:0.8rem;" data-translate="demo_note" data-page-node-id="fuVh7DhCOYJ3Leo2H3rtit">支持国际专线 / 海湾物流 / 立信诺 实时查询</div>
             </div>
         </div>
     </section>
 
     <!-- 3. 核心优势 (2x2网格，分行显示) -->
-    <section id="advantages">
-        <div class="container">
-            <div class="section-title" data-translate="adv_title">核心优势</div>
-            <div class="advantages-grid">
-                <div class="advantage-card">
-                    <h3><i class="fas fa-link"></i> <span data-translate="adv1_title">稳定链路</span></h3>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv1_line1">深耕中东市场</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv1_line2">整合航线与本地资源</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv1_line3">保障运输连续性</span></p>
+    <section id="advantages" data-page-node-id="z8NuDpZGgaiBFDKYEKtF75">
+        <div class="container" data-page-node-id="uAewIsahHaaDynQE9Fq9Vh">
+            <div class="section-title" data-translate="adv_title" data-page-node-id="AVNdH7BMlc2ebCmf31xNaP">核心优势</div>
+            <div class="advantages-grid" data-page-node-id="mWmsNdwFZNx3TpTh9oYjyO">
+                <div class="advantage-card" data-page-node-id="eFvjIz5I2UZxykbEEEJneo">
+                    <h3 data-page-node-id="qYmTNKqBMIsicIa85JhYIA"><i class="fas fa-link" data-page-node-id="HJqpmb3lsocT8bOqyCISuX"></i> <span data-translate="adv1_title" data-page-node-id="aDV0x8K96usVIh48Cl90Fa">稳定链路</span></h3>
+                    <p data-page-node-id="nB6Ss3xSe2Rz92VGCSf6Jd"><i class="fas fa-angle-right" data-page-node-id="BelV6tFoVx6Q6enOOWGigo"></i> <span data-translate="adv1_line1" data-page-node-id="BCaf57UefT4Cfo2DK58l1u">深耕中东市场</span></p>
+                    <p data-page-node-id="ZLYukxFXn21iCOdoeTRuoD"><i class="fas fa-angle-right" data-page-node-id="rbiQMiKXwiGlSjhIgp2UVc"></i> <span data-translate="adv1_line2" data-page-node-id="odHMphykuf9PCCwnKETdET">整合航线与本地资源</span></p>
+                    <p data-page-node-id="iUkMC2ZJYVcFhygmkdDEWx"><i class="fas fa-angle-right" data-page-node-id="yZgFzd7hcdVU5Kzj0D5Rrv"></i> <span data-translate="adv1_line3" data-page-node-id="RTBiI3tSuC3ZSltXLp4rsu">保障运输连续性</span></p>
                 </div>
-                <div class="advantage-card">
-                    <h3><i class="fas fa-clipboard-list"></i> <span data-translate="adv2_title">前端管控</span></h3>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv2_line1">发货前预审机制</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv2_line2">出库前货物核查</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv2_line3">预防清关与标签风险</span></p>
+                <div class="advantage-card" data-page-node-id="nUSf9DEKKVJjD8q0eXksv1">
+                    <h3 data-page-node-id="UExEGWS3bUFY9yB9WOi0OD"><i class="fas fa-clipboard-list" data-page-node-id="szhdluRHnWWT2YaKgw5Ea0"></i> <span data-translate="adv2_title" data-page-node-id="DtfVSmxyDxzB47OeK8Jqu8">前端管控</span></h3>
+                    <p data-page-node-id="thUzwHI8Pg1QILpysROpZe"><i class="fas fa-angle-right" data-page-node-id="uBzkfzLVRmcsRFUgisrpEe"></i> <span data-translate="adv2_line1" data-page-node-id="Wy3RvxkGK4RlciC2KDxAaD">发货前预审机制</span></p>
+                    <p data-page-node-id="YPvWKXc5WGK7NBSB2V7suc"><i class="fas fa-angle-right" data-page-node-id="6hNslKvGeORa30YEuYJb68"></i> <span data-translate="adv2_line2" data-page-node-id="YlNJA0XYblWnAj6Z3CTsGh">出库前货物核查</span></p>
+                    <p data-page-node-id="k6ewRzFFNQ9AxB3W6EJBYv"><i class="fas fa-angle-right" data-page-node-id="FTCCrnnDVrNRMo52e7c0U7"></i> <span data-translate="adv2_line3" data-page-node-id="7lyFmz7duxstRwfYMFNBsv">预防清关与标签风险</span></p>
                 </div>
-                <div class="advantage-card">
-                    <h3><i class="fas fa-map-marked-alt"></i> <span data-translate="adv3_title">全程运踪</span></h3>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv3_line1">全程轨迹实时掌控</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv3_line2">运输状态清晰可视</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv3_line3">异常风险提前预知</span></p>
+                <div class="advantage-card" data-page-node-id="1smehT0ZyEbPODSARCB8Ih">
+                    <h3 data-page-node-id="7UckkpIIK4rCJ5B7tyYbRk"><i class="fas fa-map-marked-alt" data-page-node-id="8tacFBZVBtiwX9FuqDlMiB"></i> <span data-translate="adv3_title" data-page-node-id="UGhYP9VBhAGJxdwFnCi5r4">全程运踪</span></h3>
+                    <p data-page-node-id="eKcxG5hF7BQwYWmEZ07sut"><i class="fas fa-angle-right" data-page-node-id="fF7V4RIV9axyAdVEfxwY1l"></i> <span data-translate="adv3_line1" data-page-node-id="wz2uL2s8Bx99TO8YIbKaZu">全程轨迹实时掌控</span></p>
+                    <p data-page-node-id="B7n8rzWAk4Ps3ZF2hRi1GN"><i class="fas fa-angle-right" data-page-node-id="snxBs1T7BiGCCh5iRnTkpk"></i> <span data-translate="adv3_line2" data-page-node-id="OQAPELx1PUBd4G5T9pMjg2">运输状态清晰可视</span></p>
+                    <p data-page-node-id="i0IMHbr063n33MWZQ2qoMV"><i class="fas fa-angle-right" data-page-node-id="oQ3J3qYUDTHf9Ih0nfHL8m"></i> <span data-translate="adv3_line3" data-page-node-id="ACvYD9C6AHWxiRde9jdhtd">异常风险提前预知</span></p>
                 </div>
-                <div class="advantage-card">
-                    <h3><i class="fas fa-truck-ramp-box"></i> <span data-translate="adv4_title">双清到门</span></h3>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv4_line1">解决收货人无法清关的困境</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv4_line2">解决最后一公里派送难题</span></p>
-                    <p><i class="fas fa-angle-right"></i> <span data-translate="adv4_line3">沙特与阿联酋全境派送到门</span></p>
+                <div class="advantage-card" data-page-node-id="HGGUGidRYYQj85P8BAECHI">
+                    <h3 data-page-node-id="PPxxm46En9P6hQZzqy5lvg"><i class="fas fa-truck-ramp-box" data-page-node-id="lSufRtFOJH4zWLxAKJ4uL3"></i> <span data-translate="adv4_title" data-page-node-id="XEWF2yNzXzqOwyoVE6Tdur">双清到门</span></h3>
+                    <p data-page-node-id="WAmEQ2sKfDQIswRFCPV9Uz"><i class="fas fa-angle-right" data-page-node-id="ZXSEWIcBa7VY6Fkk0TEBro"></i> <span data-translate="adv4_line1" data-page-node-id="FuF3u0yKkD9ZRlzlA97Pgp">解决收货人无法清关的困境</span></p>
+                    <p data-page-node-id="ZKHLNBcnAGocOvwCTFX9Ym"><i class="fas fa-angle-right" data-page-node-id="01NakgAVMfiwChW1IrN2Xv"></i> <span data-translate="adv4_line2" data-page-node-id="pMpGBCHB6xDB5ZJMva1slh">解决最后一公里派送难题</span></p>
+                    <p data-page-node-id="LAjRy7RA0v616EgLTRaPuE"><i class="fas fa-angle-right" data-page-node-id="mgfXzSIxSajqNgvnA5pw6i"></i> <span data-translate="adv4_line3" data-page-node-id="yTjHbsZh1lBfChJA0VdjV9">沙特与阿联酋全境派送到门</span></p>
                 </div>
             </div>
         </div>
     </section>
 
    <!-- 4. 为什么选择我们（单独一列） -->
-<section style="background: #fafef5;">
-    <div class="container">
-        <div class="responsive-stack" style="grid-template-columns: 1fr; justify-items: center;">
-            <div>
-                <h2 class="section-title" style="text-align: left; margin-bottom: 24px;">
-                    <span style="color: #4caf50; font-weight: 700; margin-right: 8px;">？</span>
-                    <span data-translate="trust_title">为什么选择我们</span>
+<section style="background: #fafef5;" data-page-node-id="iD5jdIrVypayHEB8hLZgCT">
+    <div class="container" data-page-node-id="Nj38VPRo10pottb7t8HG81">
+        <div class="responsive-stack" style="grid-template-columns: 1fr; justify-items: center;" data-page-node-id="hUy7wo7QCxbCGrT7IXS0wo">
+            <div data-page-node-id="ScJCp5tdvnRBdbOgXx2fWR">
+                <h2 class="section-title" style="text-align: left; margin-bottom: 24px;" data-page-node-id="pkwnCsP8QsEkuCAqoDTkz0">
+                    <span style="color: #4caf50; font-weight: 700; margin-right: 8px;" data-page-node-id="aPOpAu5mYx2FvuwO690xNc">？</span>
+                    <span data-translate="trust_title" data-page-node-id="ilLdSB4BKRVhHOhenyK9F5">为什么选择我们</span>
                 </h2>
-                <ul style="list-style: none; padding-left: 0; margin-top: 20px;">
-                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;">
-                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;"></i>
-                        <span data-translate="trust1">长期服务中东跨境卖家与贸易客户</span>
+                <ul style="list-style: none; padding-left: 0; margin-top: 20px;" data-page-node-id="AagpmKPJEOYZbTVu9kZQe6">
+                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;" data-page-node-id="WlbH5btJjZGtgQubZdWRRN">
+                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;" data-page-node-id="ovzZoGXAgiGRx8FGtC05i4"></i>
+                        <span data-translate="trust1" data-page-node-id="Dfe1qhLzSzwfrni5I6Dkxc">长期服务中东跨境卖家与贸易客户</span>
                     </li>
-                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;">
-                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;"></i>
-                        <span data-translate="trust2">持续优化运输链路与操作流程</span>
+                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;" data-page-node-id="DlP3BxmTwsvEZBLuTArrHv">
+                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;" data-page-node-id="ZawBEW6DypHMN2WrFAxYcu"></i>
+                        <span data-translate="trust2" data-page-node-id="xKnP4WPmTQVkGLB7VcBh9p">持续优化运输链路与操作流程</span>
                     </li>
-                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;">
-                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;"></i>
-                        <span data-translate="trust3">以稳定性与风险控制为核心</span>
+                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; font-size: 1rem; color: #2e5c2e;" data-page-node-id="0pN7M41PvTbhOmwpxaXnD4">
+                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;" data-page-node-id="zaPYXja96xclpuoOV16YQq"></i>
+                        <span data-translate="trust3" data-page-node-id="1mxDu6Y0hLDEKY3lXvzXfu">以稳定性与风险控制为核心</span>
                     </li>
-                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 0; font-size: 1rem; color: #2e5c2e;">
-                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;"></i>
-                        <span data-translate="trust4">帮助客户建立可持续发货节奏</span>
+                    <li style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 0; font-size: 1rem; color: #2e5c2e;" data-page-node-id="rd8PEcOAxjD9YmhpAnz2k8">
+                        <i class="fas fa-check-circle" style="color: #4caf50; width: 22px; font-size: 1.1rem;" data-page-node-id="AoGCo2GJucXgTPgSg1f5EF"></i>
+                        <span data-translate="trust4" data-page-node-id="UwAXqHJqsJpMlaEACsS6Q4">帮助客户建立可持续发货节奏</span>
                     </li>
                 </ul>
             </div>
@@ -445,29 +462,29 @@
 </section>
 
     <!-- 5. 底部转化 + 四个二维码（含视频号） -->
-    <section id="contact">
-        <div class="container">
-            <div class="bottom-cta">
-                <h2 style="font-size: 2rem; color: #1e4620; margin-bottom: 15px;" data-translate="cta_title">获取您的中东物流方案</h2>
-                <p style="margin-bottom: 30px; font-size: 1.1rem;" data-translate="cta_desc">根据您的产品与发货需求，提供匹配的运输建议</p>
-                <div class="qr-row">
-                    <div class="qr-item"><img src="wechat_qr.png" alt="微信二维码" style="width:90px; height:90px; border-radius: 12px;"><p data-translate="wechat_label">微信联系</p></div>
-                    <div class="qr-item"><img src="mp_qr.png" alt="公众号二维码" style="width:90px; height:90px; border-radius: 12px;"><p data-translate="mp_label">微信公众号</p></div>
-                    <div class="qr-item"><img src="video_qr.png" alt="视频号二维码" style="width:90px; height:90px; border-radius: 12px;"><p data-translate="video_label">微信视频号</p></div>
-                    <div class="qr-item"><img src="whatsapp_qr.png" alt="WhatsApp二维码" style="width:90px; height:90px; border-radius: 12px;"><p data-translate="wa_label">WhatsApp</p></div>
+    <section id="contact" data-page-node-id="j7EU2SydSGAT2T0R8G3OgE">
+        <div class="container" data-page-node-id="acW3V4cze0kBFAA0oL3s8u">
+            <div class="bottom-cta" data-page-node-id="gC3W77GhHZwL10YbxOXrFN">
+                <h2 style="font-size: 2rem; color: #1e4620; margin-bottom: 15px;" data-translate="cta_title" data-page-node-id="e7Pk90CaRA5x3JSI1ZuhUf">获取您的中东物流方案</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem;" data-translate="cta_desc" data-page-node-id="mpVIa2jBxd38b9iOkNahPq">根据您的产品与发货需求，提供匹配的运输建议</p>
+                <div class="qr-row" data-page-node-id="aa6ri6okDW5alvtwJUg0YK">
+                    <div class="qr-item" data-page-node-id="CvP7XAjBfVbBFtttqEEXxC"><img src="wechat_qr.png" alt="微信二维码" style="width:90px; height:90px; border-radius: 12px;" data-page-node-id="QFYYPRRNLcmHBoFQhNzLX3"><p data-translate="wechat_label" data-page-node-id="fIbNu3L9nDeCuzDukj3O7F">微信联系</p></div>
+                    <div class="qr-item" data-page-node-id="7MiQIz3jZCaGzI6oiQ6Nu2"><img src="mp_qr.png" alt="公众号二维码" style="width:90px; height:90px; border-radius: 12px;" data-page-node-id="oxM5AE4vowknHlx7g8yhet"><p data-translate="mp_label" data-page-node-id="gK79cqKIZXF05lRed9z8zL">微信公众号</p></div>
+                    <div class="qr-item" data-page-node-id="CMpyeTE6sPqleA10dyRgGv"><img src="video_qr.png" alt="视频号二维码" style="width:90px; height:90px; border-radius: 12px;" data-page-node-id="gmaHGc3HbqUvYyKBBoAiFO"><p data-translate="video_label" data-page-node-id="NLOpRSPMtM0UKHQTqSpXJX">微信视频号</p></div>
+                    <div class="qr-item" data-page-node-id="qNWA6grvnEtMygV4GYr1By"><img src="whatsapp_qr.png" alt="WhatsApp二维码" style="width:90px; height:90px; border-radius: 12px;" data-page-node-id="gb78YHYoppgHC2abNunY0T"><p data-translate="wa_label" data-page-node-id="TZNtU9M6ix0E5fZ8gaZqyZ">WhatsApp</p></div>
                 </div>
-                <div style="margin-top: 20px;">
-                    <a href="#" class="btn-primary" style="background:#ffb347; color:#1e4620;" data-translate="cta_btn">立即咨询 ➔</a>
-                    <a href="#" class="btn-outline" style="margin-left: 16px;" data-translate="quote_btn">获取报价</a>
+                <div style="margin-top: 20px;" data-page-node-id="3TpXXb3AHORmJ9KRajM13P">
+                    <a href="#" class="btn-primary" style="background:#ffb347; color:#1e4620;" data-translate="cta_btn" data-page-node-id="qJIu5QfE0G15uT4t4z1xbT">立即咨询 ➔</a>
+                    <a href="#" class="btn-outline" style="margin-left: 16px;" data-translate="quote_btn" data-page-node-id="FuQMpIymk9ivLPKvdVKUnD">获取报价</a>
                 </div>
             </div>
         </div>
     </section>
 </main>
 
-<footer class="footer-copyright">
-    <div class="container">
-        &copy; 2025 ALBB LOGISTICS COMPANY | <span data-translate="footer_rights">专业中东物流服务商 · 沙特阿联酋专线</span>
+<footer class="footer-copyright" data-page-node-id="tHz2knE4Opje52k5hJR8pF">
+    <div class="container" data-page-node-id="cGtBBcrRiy0mYGp4UW0mTQ">
+        &copy; 2025 ALBB LOGISTICS COMPANY | <span data-translate="footer_rights" data-page-node-id="GK3on02vYBkgjErCOOCOq5">专业中东物流服务商 · 沙特阿联酋专线</span>
     </div>
 </footer>
 
@@ -492,7 +509,7 @@
             adv3_title: "全程运踪", adv3_line1: "全程轨迹实时掌控", adv3_line2: "运输状态清晰可视", adv3_line3: "异常风险提前预知",
             adv4_title: "双清到门", adv4_line1: "解决收货人无法清关的困境", adv4_line2: "解决最后一公里派送难题", adv4_line3: "沙特与阿联酋全境派送到门",
             trust_title: " 为什么选择我们", trust1: "长期服务中东跨境卖家与贸易客户", trust2: "持续优化运输链路与操作流程", trust3: "以稳定性与风险控制为核心", trust4: "帮助客户建立可持续发货节奏",
-            track_title: "📡 24小时在线查询", track_sub: "让您对货物了如指掌", track_btn: "查询运踪", track_default: "输入运单号，查看模拟轨迹", demo_note: "演示数据，对接真实API后可显示实时物流",
+            track_title: "📡 24小时在线查询", track_sub: "让您对货物了如指掌", track_btn: "查询运踪", track_default: "输入运单号，查询实时轨迹", demo_note: "支持国际专线 / 海湾物流 / 立信诺 实时查询",
             cta_title: "获取您的中东物流方案", cta_desc: "根据您的产品与发货需求，提供匹配的运输建议",
             wechat_label: "微信联系", mp_label: "微信公众号", video_label: "微信视频号", wa_label: "WhatsApp", cta_btn: "立即咨询 ➔", quote_btn: "获取报价",
             footer_rights: "专业中东物流服务商 · 沙特阿联酋专线"
@@ -515,7 +532,7 @@
             adv3_title: "Full Tracking", adv3_line1: "Real-time control of whole journey", adv3_line2: "Clear visibility of transit status", adv3_line3: "Early warning of abnormal risks",
             adv4_title: "DDP Door-to-Door", adv4_line1: "Solve consignee's customs troubles", adv4_line2: "Solve last-mile delivery challenges", adv4_line3: "Door delivery across Saudi & UAE",
             trust_title: " Why Choose Us", trust1: "Long-term service for ME sellers", trust2: "Continuous process optimization", trust3: "Focus on stability & risk control", trust4: "Help build sustainable shipping rhythm",
-            track_title: "📡 24/7 Online Tracking", track_sub: "Full visibility of your cargo", track_btn: "Track", track_default: "Enter tracking number to view demo", demo_note: "Demo data only, ready for real API integration",
+            track_title: "📡 24/7 Online Tracking", track_sub: "Full visibility of your cargo", track_btn: "Track", track_default: "Enter tracking number to track", demo_note: "Real-time tracking for 3 carriers",
             cta_title: "Get Your Middle East Logistics Plan", cta_desc: "Tailored advice based on your products & shipping needs",
             wechat_label: "WeChat Contact", mp_label: "Official WeChat", video_label: "WeChat Channels", wa_label: "WhatsApp ", cta_btn: "Inquiry ➔", quote_btn: "Get Quote",
             footer_rights: "Professional Middle East Logistics · Saudi & UAE Specialist"
@@ -523,6 +540,18 @@
     };
 
     let currentLang = 'zh';
+
+    // ⚠️ 声明提前：applyLanguage('zh') 首次调用会触发 renderTrackTabs()，
+    //    必须在首次调用前完成初始化（避免 TDZ: Cannot access before initialization）
+    // ⚠️ 部署后请把下行地址换成你自己的 Cloudflare Worker 地址
+    const TRACK_API = 'https://track-proxy.benxu19820101.workers.dev';
+
+    const TRACK_SOURCES = [
+        { id: 'ontask', label: '国际专线', label_en: 'Intl Line' },
+        { id: 'gulf56', label: '海湾物流', label_en: 'Gulf56' },
+        { id: 'lxcn',   label: '立信诺',   label_en: 'Lxcn' }
+    ];
+    let currentTrackSource = 'ontask';
     function applyLanguage(lang) {
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.getAttribute('data-translate');
@@ -532,12 +561,15 @@
             }
         });
         currentLang = lang;
-        // 刷新轨迹显示（如果已经有查询结果，重新渲染？简单起见，清空结果提示用户重新查询）
+        // 【BUG修复】原代码此处无限递归调用 applyLanguage 导致
+        // "Maximum call stack size exceeded"，整个脚本崩溃、查询按钮失效。
+        // 现改为：语言切换时直接重置结果区为新语言提示（不再递归）。
         const resultDiv = document.getElementById('trackResult');
-        if (resultDiv && !resultDiv.querySelector('.no-result-placeholder')) {
-            resultDiv.innerHTML = `<div style="text-align:center; color:#5a7c5a;"><i class="fas fa-search"></i> <span data-translate="track_default">输入运单号，查看模拟轨迹</span></div>`;
-            applyLanguage(lang); // 重新应用一次确保内部span翻译
+        if (resultDiv) {
+            resultDiv.innerHTML = `<div style="text-align:center; color:#5a7c5a;"><i class="fas fa-search"></i> <span>${translations[lang].track_default}</span></div>`;
         }
+        // 语言切换时同步刷新站点切换标签
+        if (typeof renderTrackTabs === 'function') renderTrackTabs();
     }
     document.getElementById('langToggle').addEventListener('click', () => {
         const newLang = currentLang === 'zh' ? 'en' : 'zh';
@@ -545,46 +577,100 @@
     });
     applyLanguage('zh');
 
-    // 物流追踪（根据当前语言返回不同状态文本）
-    async function fetchMockTrack(trackingNumber, lang) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const now = new Date();
-                const d = (days) => { let dt = new Date(now); dt.setDate(now.getDate()-days); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; };
-                const tracks = {
-                    zh: [
-                        { date: d(3), status: "【深圳仓】已揽收，出口报关中" },
-                        { date: d(2), status: "【中转】航班/船班发往迪拜/利雅得" },
-                        { date: d(1), status: "【目的地清关】清关进行中" },
-                        { date: d(0), status: "【末端派送】已交付本地车队，预计今日送达" }
-                    ],
-                    en: [
-                        { date: d(3), status: "[Shenzhen] Collected, export customs clearance" },
-                        { date: d(2), status: "[Transit] Flight/vessel en route to Dubai/Riyadh" },
-                        { date: d(1), status: "[Destination Clearance] Customs processing" },
-                        { date: d(0), status: "[Last-mile Delivery] Handed to local fleet, expected delivery today" }
-                    ]
-                };
-                resolve({ success: true, number: trackingNumber, traces: tracks[lang] || tracks.zh });
-            }, 500);
+    // ============================================================
+    //  真实物流查询（对接 ontask / gulf56 / lxcn 三站）
+    //  ⚠️ 部署后请把下行地址换成你自己的 Cloudflare Worker 地址
+    // ============================================================
+    // 渲染站点切换标签
+    function renderTrackTabs() {
+        const box = document.getElementById('trackSourceTabs');
+        if (!box) return;
+        box.innerHTML = TRACK_SOURCES.map(s =>
+            `<button type="button" class="track-tab${s.id === currentTrackSource ? ' active' : ''}" data-id="${s.id}">${currentLang === 'zh' ? s.label : s.label_en}</button>`
+        ).join('');
+        box.querySelectorAll('.track-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentTrackSource = btn.dataset.id;
+                renderTrackTabs();
+            });
         });
+    }
+
+    function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g,
+            c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
     async function handleTrack() {
         const input = document.getElementById('trackingNumber').value.trim();
         const resultDiv = document.getElementById('trackResult');
-        if (!input) { resultDiv.innerHTML = `<div style="color:#c62828;">${currentLang === 'zh' ? '请输入运单号' : 'Please enter tracking number'}</div>`; return; }
-        resultDiv.innerHTML = `<div style="text-align:center;"><i class="fas fa-spinner fa-pulse"></i> ${currentLang === 'zh' ? '查询中...' : 'Searching...'}</div>`;
-        const data = await fetchMockTrack(input, currentLang);
-        if (data.success) {
-            let html = `<div style="margin-bottom:12px;"><strong>${currentLang === 'zh' ? '运单号' : 'Tracking No'}: ${data.number}</strong></div><div style="border-left:3px dashed #4caf50; padding-left:20px;">`;
-            data.traces.forEach(t => { html += `<div style="margin-bottom:18px;"><div style="font-weight:bold;">${t.date}</div><div style="background:#f1f9eb; padding:6px 12px; border-radius:20px;">${t.status}</div></div>`; });
-            html += `</div><div style="margin-top:12px; text-align:center; font-size:0.75rem;">${currentLang === 'zh' ? '模拟轨迹演示' : 'Demo tracking'}</div>`;
-            resultDiv.innerHTML = html;
-        } else resultDiv.innerHTML = `<div style="color:#c62828;">${currentLang === 'zh' ? '未找到运单' : 'Not found'}</div>`;
+        const zh = currentLang === 'zh';
+
+        if (!input) {
+            resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请输入运单号' : 'Please enter tracking number'}</div>`;
+            return;
+        }
+
+        resultDiv.innerHTML = `<div style="text-align:center;"><i class="fas fa-spinner fa-pulse"></i> ${zh ? '查询中...' : 'Searching...'}</div>`;
+
+        try {
+            const resp = await fetch(
+                `${TRACK_API}/?source=${currentTrackSource}&trackingNo=${encodeURIComponent(input)}`
+            );
+            const data = await resp.json();
+
+            if (!data.ok) {
+                resultDiv.innerHTML = `<div style="color:#c62828;">${escapeHtml(data.error || (zh ? '查询失败' : 'Query failed'))}</div>`;
+                return;
+            }
+
+            const traces = data.tracks || [];
+
+            if (!traces.length && !data.summary) {
+                if (data.destination || data.voyNo) {
+                    // 运单已登记但暂无轨迹明细（如 lxcn 只返回目的地）
+                    let meta = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
+                    if (data.destination) meta += `　<span style="color:#5a7c5a;">${zh ? '目的地' : 'Dest'}: ${escapeHtml(data.destination)}</span>`;
+                    meta += `</div><div style="color:#8a6d3b; background:#fdf6e3; padding:8px 14px; border-radius:20px; display:inline-block;">${zh ? '运单已登记，轨迹明细待更新' : 'Registered, track details pending'}</div>`;
+                    resultDiv.innerHTML = meta;
+                } else {
+                    resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '未找到该运单的轨迹信息' : 'No tracking records found'}</div>`;
+                }
+                return;
+            }
+
+            let out = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
+            if (data.destination) {
+                out += `　<span style="color:#5a7c5a;">${zh ? '目的地' : 'Dest'}: ${escapeHtml(data.destination)}</span>`;
+            }
+            if (data.voyNo) {
+                out += `　<span style="color:#5a7c5a;">${zh ? '航次' : 'Voyage'}: ${escapeHtml(data.voyNo)}</span>`;
+            }
+            out += `</div>`;
+
+            if (traces.length) {
+                out += `<div style="border-left:3px dashed #4caf50; padding-left:20px;">`;
+                traces.forEach(t => {
+                    const st = (currentLang === 'en' && t.statusEn) ? t.statusEn : t.status;
+                    out += `<div style="margin-bottom:18px;">
+                        <div style="font-weight:bold;">${escapeHtml(t.time)}</div>
+                        <div style="background:#f1f9eb; padding:6px 12px; border-radius:20px;">${escapeHtml(st)}</div>
+                    </div>`;
+                });
+                out += `</div>`;
+            } else if (data.summary) {
+                out += `<div style="background:#f7f9f7; padding:12px; border-radius:8px; font-size:0.85rem; line-height:1.7; white-space:pre-wrap;">${escapeHtml(data.summary)}</div>`;
+            }
+
+            resultDiv.innerHTML = out;
+        } catch (err) {
+            resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '网络错误，请稍后重试' : 'Network error, please retry'}</div>`;
+        }
     }
+
     document.getElementById('trackBtn').addEventListener('click', handleTrack);
     document.getElementById('trackingNumber').addEventListener('keypress', e => { if(e.key === 'Enter') handleTrack(); });
+    renderTrackTabs();
 </script>
 
 <!-- 
