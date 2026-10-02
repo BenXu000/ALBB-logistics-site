@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>运踪查询 | ALBB 中东专线</title>
+<!-- 小程序 web-view 需要这个 JSSDK 才能调用返回等接口，必须在本页脚本之前加载 -->
+<script src="https://res.wx.qq.com/open/js/jweixin-1.3.2.js"></script>
+<style>
+  :root {
+    --brand: #005BAC;
+    --brand-dark: #004785;
+    --bg: #f2f4f7;
+    --card: #ffffff;
+    --line: #e6e9ef;
+    --text: #1b2431;
+    --muted: #7b8794;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .bar {
+    background: var(--brand);
+    color: #fff;
+    padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex: none;
+  }
+  .bar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .icon-btn {
+    width: 30px; height: 30px; flex: none;
+    border: none; background: rgba(255,255,255,.16); color: #fff;
+    border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+  }
+  .icon-btn.show { display: flex; }
+  .bar-title { font-size: 16px; font-weight: 600; letter-spacing: .5px; }
+  .bar-sub { font-size: 11px; opacity: .78; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy-btn {
+    flex: none;
+    border: 1px solid rgba(255,255,255,.45);
+    background: rgba(255,255,255,.12);
+    color: #fff; font-size: 13px; padding: 5px 12px; border-radius: 14px; cursor: pointer;
+  }
+  .copy-btn:active { background: rgba(255,255,255,.28); }
+
+  /* ---------- 单号条 ---------- */
+  .no-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px; flex: none;
+    font-size: 13px; color: var(--muted);
+  }
+  .no-bar b { color: var(--text); font-size: 15px; letter-spacing: .4px; word-break: break-all; }
+  .tag {
+    margin-left: auto; flex: none;
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #eaf3fb; color: var(--brand); border: 1px solid #cfe3f5;
+  }
+
+  /* ---------- 主体 ---------- */
+  main { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+  iframe { flex: 1; width: 100%; border: none; background: #fff; display: block; }
+
+  .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 12px 24px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px; margin-bottom: 12px;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .card-code { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+  .card-voy { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .card-voy b { color: #d93025; }
+
+  /* 时间轴 */
+  .timeline { margin-top: 12px; padding-left: 4px; }
+  .node { position: relative; padding: 0 0 18px 20px; }
+  .node:last-child { padding-bottom: 0; }
+  .node::before {
+    content: ""; position: absolute; left: 3px; top: 6px;
+    width: 9px; height: 9px; border-radius: 50%; background: #c9d2dc;
+  }
+  .node.first::before { background: var(--brand); box-shadow: 0 0 0 3px rgba(0,91,172,.15); }
+  .node::after {
+    content: ""; position: absolute; left: 7px; top: 17px; bottom: 0; width: 1px; background: var(--line);
+  }
+  .node:last-child::after { display: none; }
+  .node-time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .node-zh { font-size: 15px; font-weight: 500; margin-top: 2px; }
+  .node-en { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .proofs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .proofs img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); cursor: pointer; }
+
+  .sub { background: #f7f9fb; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .sub .card-code { font-size: 15px; }
+
+  /* 状态块 */
+  .state { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+  .state .spin {
+    width: 26px; height: 26px; margin: 0 auto 12px;
+    border: 2px solid #dbe3ec; border-top-color: var(--brand);
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .state.err { color: #d93025; }
+
+  /* 无单号时的输入框 */
+  .form { padding: 24px 14px; }
+  .form input {
+    width: 100%; height: 44px; padding: 0 14px; font-size: 15px;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--text);
+  }
+  .form button {
+    margin-top: 12px; width: 100%; height: 44px; border: none; border-radius: 10px;
+    background: var(--brand); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+  .form .hint { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+    background: rgba(0,0,0,.82); color: #fff; font-size: 13px;
+    padding: 8px 16px; border-radius: 18px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 99;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <button class="icon-btn" id="back">&#8249;</button>
+    <div>
+      <div class="bar-title">运踪查询</div>
+      <div class="bar-sub" id="siteName">ALBB 中东专线</div>
+    </div>
+  </div>
+  <button class="copy-btn" id="copy">复制单号</button>
+</div>
+
+<div class="no-bar" id="noBar" style="display:none">
+  <span>单号</span><b id="noText"></b><span class="tag" id="siteTag"></span>
+</div>
+
+<main id="main"></main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+ * ALBB 运踪中转页
+ * -------------------------------------------------------------------------
+ * 作用：微信小程序 web-view 只能打开「业务域名」，查询平台不是我们的域名、
+ *       配不了业务域名，所以由本页（自有域名）作为入口，内部再去取真实轨迹。
+ *
+ * 三种取数方式：
+ *   1. iframe  ：tracking.lxcn.com 支持 ?o=单号 服务端渲染，直接嵌进来就是结果页
+ *   2. api    ：logistics.ontaskksad2d.com 无法用 URL 带单号，但它有开放接口且允许
+ *              跨域，本页直接请求接口并渲染轨迹
+ *   3. external：www.gulf56.com 目前只有 http（https 请求返回 502），https 页面不能加载
+ *              http 内容（浏览器混合内容拦截），只能引导客户到浏览器查询。
+ *              对方开通 https 后，把 GULF56.mode 改成 'iframe'、url 换成 https 即可。
+ *
+ * 用法：https://www.alibaba-log.com/track.html?no=单号
+ * ========================================================================= */
+
+var GULF56 = {
+  key: 'gulf56',
+  name: 'www.gulf56.com',
+  mode: 'external',
+  url: 'http://www.gulf56.com/'
+};
+var LXCN = {
+  key: 'lxcn',
+  name: 'tracking.lxcn.com',
+  mode: 'iframe',
+  url: 'https://tracking.lxcn.com/'
+};
+var ONTASK = {
+  key: 'ontask',
+  name: 'logistics.ontaskksad2d.com',
+  mode: 'api',
+  url: 'https://logistics.ontaskksad2d.com/#/home',
+  api: 'https://logistics.ontaskksad2d.com/api1/logistic_sys/comm_order_tracking'
+};
+
+/* 匹配顺序：先长后短，避免 ALBBWL 被 ALBG 误判 */
+function matchPlatform(no) {
+  var s = (no || '').trim();
+  if (!s) return null;
+  if (/^ALBBWL/i.test(s)) return GULF56;
+  if (/^ALBG/i.test(s)) return LXCN;
+  if (/^8/.test(s)) return ONTASK;
+  return null;
+}
+
+function qs(name) {
+  var m = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+var $ = function (id) { return document.getElementById(id); };
+var main = $('main');
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function toast(msg) {
+  var t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function () { t.classList.remove('show'); }, 1800);
+}
+
+function state(html, isErr) {
+  main.innerHTML = '<div class="state' + (isErr ? ' err' : '') + '">' + html + '</div>';
+}
+
+function loading(text) {
+  state('<div class="spin"></div>' + esc(text || '正在查询…'));
+}
+
+/* ---------------- 复制单号 ---------------- */
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { toast('单号已复制'); }, fallback);
+  } else { fallback(); }
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('单号已复制'); }
+    catch (e) { toast('复制失败，请长按选择'); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ---------------- 方式一：iframe ---------------- */
+function renderIframe(platform, no) {
+  $('siteName').textContent = platform.name;
+  $('siteTag').textContent = platform.name;
+  main.innerHTML = '';
+  var f = document.createElement('iframe');
+  f.src = platform.url + '?o=' + encodeURIComponent(no);
+  f.setAttribute('allow', 'geolocation');
+  f.referrerPolicy = 'no-referrer';
+  main.appendChild(f);
+}
+
+/* ---------------- 方式二：接口取数 ---------------- */
+function fmtTime(s) {
+  if (!s) return '';
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return String(s);
+  function p(n) { return (n < 10 ? '0' : '') + n; }
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+         ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+function trackNodesHtml(list) {
+  if (!Array.isArray(list) || !list.length) {
+    return '<div style="color:#7b8794;font-size:13px;padding:6px 0">暂无轨迹信息</div>';
+  }
+  return '<div class="timeline">' + list.map(function (t, i) {
+    var zh = t.processZh || t.processEn || '';
+    var en = t.processEn || '';
+    var proofs = Array.isArray(t.outProofUrl) ? t.outProofUrl.filter(Boolean) : [];
+    var imgHtml = proofs.length
+      ? '<div class="proofs">' + proofs.map(function (u) {
+          return '<img src="' + esc(u) + '" onclick="window.open(\'' + esc(u) + '\')">';
+        }).join('') + '</div>'
+      : '';
+    return '<div class="node' + (i === 0 ? ' first' : '') + '">' +
+             '<div class="node-time">' + esc(fmtTime(t.timeDot)) + '</div>' +
+             '<div class="node-zh">' + esc(zh) + '</div>' +
+             (en && en !== zh ? '<div class="node-en">' + esc(en) + '</div>' : '') +
+             imgHtml +
+           '</div>';
+  }).join('') + '</div>';
+}
+
+function itemHtml(item, isSub) {
+  var code = item.orderCode || '';
+  var voy = item.voyNo || '';
+  var tracks = item.trackList || [];
+  var head = '<div class="card-head">' +
+      '<span class="card-code">' + esc(code) + '</span>' +
+      (voy ? '<span class="card-voy">Voy No: <b>' + esc(voy) + '</b></span>' : '') +
+    '</div>';
+  var subs = '';
+  if (Array.isArray(item.sendList) && item.sendList.length) {
+    subs = item.sendList.map(function (s) { return itemHtml(s, true); }).join('');
+  }
+  var body = '<div class="timeline-wrap">' + (subs ? '<div class="sub-wrap">' + subs + '</div>' : '') + trackNodesHtml(tracks) + '</div>';
+  return isSub
+    ? '<div class="sub">' + head + body + '</div>'
+    : '<div class="card">' + head + body + '</div>';
+}
+
+function renderApi(platform, no) {
+  $('siteName').textContent = platform.name;
+  $('siteTag').textContent = platform.name;
+  loading('正在查询轨迹…');
+  fetch(platform.api, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify({ orderCodes: [no] })
+  })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (res) {
+      var list = res && res.data ? res.data : [];
+      if (!list.length) { state('未查询到该单号，请联系客服确认'); return; }
+      main.innerHTML = '<div class="scroll">' + list.map(function (i) {
+        return itemHtml(i, false);
+      }).join('') + '</div>';
+    })
+    .catch(function (e) {
+      state('查询失败，请稍后重试<br><span style="font-size:12px">' + esc(e.message || '') + '</span>', true);
+    });
+}
+
+/* ---------------- 方式三：只有 http 的站点，引导到浏览器 ---------------- */
+function renderExternal(platform, no) {
+  $('siteName').textContent = platform.name;
+  $('siteTag').textContent = platform.name;
+  main.innerHTML =
+    '<div class="scroll"><div class="card">' +
+      '<div class="card-head"><span class="card-code">' + esc(no) + '</span></div>' +
+      '<p style="margin-top:10px;font-size:14px;line-height:1.8;color:#5b6673">' +
+        '该单号需在 <b>' + esc(platform.name) + '</b> 查询。<br>' +
+        '该网站目前只提供 http 访问，小程序内无法直接展示，请在浏览器中打开后粘贴单号查询。' +
+      '</p>' +
+      '<button id="openSite" style="margin-top:14px;width:100%;height:44px;border:none;border-radius:10px;' +
+        'background:#005BAC;color:#fff;font-size:16px;font-weight:600;cursor:pointer">' +
+        '复制单号并打开查询网站</button>' +
+    '</div></div>';
+  $('openSite').onclick = function () {
+    copyText(no);
+    window.open(platform.url);
+  };
+}
+
+/* ---------------- 入口 ---------------- */
+function run(no) {
+  no = (no || '').trim();
+  if (!no) { renderForm(); return; }
+
+  var platform = matchPlatform(no);
+  $('noText').textContent = no;
+  $('noBar').style.display = 'flex';
+  $('copy').onclick = function () { copyText(no); };
+
+  if (!platform) {
+    state('暂不支持该单号，请联系客服查询', true);
+    return;
+  }
+  if (platform.mode === 'iframe') renderIframe(platform, no);
+  else if (platform.mode === 'api') renderApi(platform, no);
+  else renderExternal(platform, no);
+}
+
+function renderForm() {
+  $('noBar').style.display = 'none';
+  main.innerHTML =
+    '<div class="form">' +
+      '<input id="noInput" placeholder="请输入运踪单号" autocomplete="off">' +
+      '<button id="goBtn">查询运踪</button>' +
+      '<div class="hint">支持 ALBBWL / ALBG 开头、以及数字 8 开头的单号。<br>其他单号请联系客服查询。</div>' +
+    '</div>';
+  var input = $('noInput');
+  $('goBtn').onclick = function () {
+    var v = input.value.trim();
+    if (!v) { toast('请输入运踪单号'); return; }
+    if (!matchPlatform(v)) { toast('暂不支持该单号，请联系客服查询'); return; }
+    window.location.href = '?no=' + encodeURIComponent(v);
+  };
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('goBtn').click();
+  });
+}
+
+/* 小程序内打开时显示返回按钮 */
+(function () {
+  var inMini = /miniProgram/i.test(navigator.userAgent) ||
+               (window.__wxjs_environment === 'miniprogram');
+  if (inMini && typeof wx !== 'undefined' && wx.miniProgram) {
+    var b = $('back');
+    b.classList.add('show');
+    b.onclick = function () { wx.miniProgram.navigateBack(); };
+  }
+})();
+
+run(qs('no'));
+</script>
+</body>
+</html>
