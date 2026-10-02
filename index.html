@@ -383,7 +383,7 @@
             <div class="track-section" data-page-node-id="e8L5TIFbIwdDSLTxMbqBPm">
                 <div class="section-title" style="margin-bottom: 8px;" data-translate="track_title" data-page-node-id="ADSqNSIa4eDN9ASTRBT4NN">📡 24小时在线查询</div>
                 <div class="section-sub" data-translate="track_sub" data-page-node-id="QCAc7vdXIaeVkAhuqKJtlI">让您对货物了如指掌</div>
-                <div id="trackSourceTabs" class="track-tabs" data-page-node-id="5DQ49dStcmW53MZiBN7BUy"></div>
+                <div id="trackSourceTabs" class="track-tabs" style="display:none;" data-page-node-id="5DQ49dStcmW53MZiBN7BUy"></div>
                 <div class="track-box" data-page-node-id="LK22E1zVASOiRamluSRscs">
                     <input type="text" id="trackingNumber" placeholder="例如：ALBB123456789" autocomplete="off" data-page-node-id="tF575YF9NdBOPj2ByZOcXc">
                     <button id="trackBtn" data-page-node-id="s6sTXK9RQFPWiIjSIWZp9B"><span data-translate="track_btn" data-page-node-id="N3EYzulqzSYeoVpbb5Yfz2">查询运踪</span></button>
@@ -391,7 +391,6 @@
                 <div id="trackResult" class="timeline-demo" data-page-node-id="bcN0MOnoeRN9hghKQKH6Za">
                     <div style="text-align:center; color:#5a7c5a;" data-page-node-id="fbmLYwUOHvD2258hZZVdnl"><i class="fas fa-search" data-page-node-id="QvWMXAsryEZG1A8Dbme0Aj"></i> <span data-translate="track_default" data-page-node-id="RGEwKaHwrt9FroOhV8STSv">输入运单号，查询实时轨迹</span></div>
                 </div>
-                <div class="demo-note" style="text-align:center; margin-top:15px; font-size:0.8rem;" data-translate="demo_note" data-page-node-id="fuVh7DhCOYJ3Leo2H3rtit">支持国际专线 / 海湾物流 / 立信诺 实时查询</div>
             </div>
         </div>
     </section>
@@ -509,7 +508,7 @@
             adv3_title: "全程运踪", adv3_line1: "全程轨迹实时掌控", adv3_line2: "运输状态清晰可视", adv3_line3: "异常风险提前预知",
             adv4_title: "双清到门", adv4_line1: "解决收货人无法清关的困境", adv4_line2: "解决最后一公里派送难题", adv4_line3: "沙特与阿联酋全境派送到门",
             trust_title: " 为什么选择我们", trust1: "长期服务中东跨境卖家与贸易客户", trust2: "持续优化运输链路与操作流程", trust3: "以稳定性与风险控制为核心", trust4: "帮助客户建立可持续发货节奏",
-            track_title: "📡 24小时在线查询", track_sub: "让您对货物了如指掌", track_btn: "查询运踪", track_default: "输入运单号，查询实时轨迹", demo_note: "支持国际专线 / 海湾物流 / 立信诺 实时查询",
+            track_title: "📡 24小时在线查询", track_sub: "让您对货物了如指掌", track_btn: "查询运踪", track_default: "输入运单号，查询实时轨迹",
             cta_title: "获取您的中东物流方案", cta_desc: "根据您的产品与发货需求，提供匹配的运输建议",
             wechat_label: "微信联系", mp_label: "微信公众号", video_label: "微信视频号", wa_label: "WhatsApp", cta_btn: "立即咨询 ➔", quote_btn: "获取报价",
             footer_rights: "专业中东物流服务商 · 沙特阿联酋专线"
@@ -532,7 +531,7 @@
             adv3_title: "Full Tracking", adv3_line1: "Real-time control of whole journey", adv3_line2: "Clear visibility of transit status", adv3_line3: "Early warning of abnormal risks",
             adv4_title: "DDP Door-to-Door", adv4_line1: "Solve consignee's customs troubles", adv4_line2: "Solve last-mile delivery challenges", adv4_line3: "Door delivery across Saudi & UAE",
             trust_title: " Why Choose Us", trust1: "Long-term service for ME sellers", trust2: "Continuous process optimization", trust3: "Focus on stability & risk control", trust4: "Help build sustainable shipping rhythm",
-            track_title: "📡 24/7 Online Tracking", track_sub: "Full visibility of your cargo", track_btn: "Track", track_default: "Enter tracking number to track", demo_note: "Real-time tracking for 3 carriers",
+            track_title: "📡 24/7 Online Tracking", track_sub: "Full visibility of your cargo", track_btn: "Track", track_default: "Enter tracking number to track",
             cta_title: "Get Your Middle East Logistics Plan", cta_desc: "Tailored advice based on your products & shipping needs",
             wechat_label: "WeChat Contact", mp_label: "Official WeChat", video_label: "WeChat Channels", wa_label: "WhatsApp ", cta_btn: "Inquiry ➔", quote_btn: "Get Quote",
             footer_rights: "Professional Middle East Logistics · Saudi & UAE Specialist"
@@ -543,15 +542,30 @@
 
     // ⚠️ 声明提前：applyLanguage('zh') 首次调用会触发 renderTrackTabs()，
     //    必须在首次调用前完成初始化（避免 TDZ: Cannot access before initialization）
-    // ⚠️ 部署后请把下行地址换成你自己的 Cloudflare Worker 地址
-    const TRACK_API = 'https://track-proxy.benxu19820101.workers.dev';
+    //
+    // 后端地址列表：按顺序尝试，前一个失败自动切到下一个。
+    //   ① track.alibaba-log.com  → 绑定自有域名后启用（国内访问稳定，推荐）
+    //   ② *.workers.dev          → Cloudflare 默认可达地址（大陆可能被 DNS 污染）
+    // 绑好自定义域名后，可把第 ② 项删掉。
+    const TRACK_API_LIST = [
+        'https://track.alibaba-log.com',
+        'https://track-proxy.benxu19820101.workers.dev'
+    ];
+    // 兼容旧代码里的单值引用
+    const TRACK_API = TRACK_API_LIST[0];
 
     const TRACK_SOURCES = [
         { id: 'ontask', label: '国际专线', label_en: 'Intl Line' },
         { id: 'gulf56', label: '海湾物流', label_en: 'Gulf56' },
         { id: 'lxcn',   label: '立信诺',   label_en: 'Lxcn' }
     ];
-    let currentTrackSource = 'ontask';
+    // 承运商名称映射（auto 模式识别出承运商后在结果里显示）
+    const SOURCE_LABELS = {
+        ontask: ['国际专线', 'Intl Line'],
+        gulf56: ['海湾物流', 'Gulf56'],
+        lxcn:   ['立信诺',   'Lxcn']
+    };
+    let currentTrackSource = 'auto'; // auto = 后端三站并发查询，自动匹配有数据的承运商
     function applyLanguage(lang) {
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.getAttribute('data-translate');
@@ -582,18 +596,13 @@
     //  ⚠️ 部署后请把下行地址换成你自己的 Cloudflare Worker 地址
     // ============================================================
     // 渲染站点切换标签
+    // 【改版】三站切换标签已隐藏：改用后端 auto 模式自动识别承运商，
+    // 用户只输入单号即可；TRACK_SOURCES 保留，日后想恢复标签删掉 display:none 即可
     function renderTrackTabs() {
         const box = document.getElementById('trackSourceTabs');
         if (!box) return;
-        box.innerHTML = TRACK_SOURCES.map(s =>
-            `<button type="button" class="track-tab${s.id === currentTrackSource ? ' active' : ''}" data-id="${s.id}">${currentLang === 'zh' ? s.label : s.label_en}</button>`
-        ).join('');
-        box.querySelectorAll('.track-tab').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentTrackSource = btn.dataset.id;
-                renderTrackTabs();
-            });
-        });
+        box.style.display = 'none';
+        box.innerHTML = '';
     }
 
     function escapeHtml(s) {
@@ -614,10 +623,22 @@
         resultDiv.innerHTML = `<div style="text-align:center;"><i class="fas fa-spinner fa-pulse"></i> ${zh ? '查询中...' : 'Searching...'}</div>`;
 
         try {
-            const resp = await fetch(
-                `${TRACK_API}/?source=${currentTrackSource}&trackingNo=${encodeURIComponent(input)}`
-            );
-            const data = await resp.json();
+            // 依次尝试 TRACK_API_LIST 中的后端，第一个能返回有效 JSON 的就用
+            let data = null, lastErr = null;
+            for (const base of TRACK_API_LIST) {
+                try {
+                    const resp = await fetch(
+                        `${base}/?source=${currentTrackSource}&trackingNo=${encodeURIComponent(input)}`
+                    );
+                    if (!resp.ok) { lastErr = `HTTP ${resp.status}`; continue; }
+                    const j = await resp.json();
+                    if (j && typeof j === 'object') { data = j; break; }
+                } catch (e) { lastErr = e.message || String(e); }
+            }
+            if (!data) {
+                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '查询服务暂时不可用，请稍后重试' : 'Tracking service unavailable, please retry'}（${escapeHtml(lastErr || '')}）</div>`;
+                return;
+            }
 
             if (!data.ok) {
                 resultDiv.innerHTML = `<div style="color:#c62828;">${escapeHtml(data.error || (zh ? '查询失败' : 'Query failed'))}</div>`;
@@ -625,6 +646,12 @@
             }
 
             const traces = data.tracks || [];
+
+            // 站点明确返回"查无此单"时，直接给干净提示
+            if (data.isExist === false) {
+                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '未找到该运单的轨迹信息，请核对单号后重试' : 'No tracking records found. Please verify the number.'}</div>`;
+                return;
+            }
 
             if (!traces.length && !data.summary) {
                 if (data.destination || data.voyNo) {
@@ -640,6 +667,9 @@
             }
 
             let out = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
+            if (data.auto && SOURCE_LABELS[data.source]) {
+                out += `　<span style="color:#5a7c5a;">${zh ? '承运商' : 'Carrier'}: ${zh ? SOURCE_LABELS[data.source][0] : SOURCE_LABELS[data.source][1]}</span>`;
+            }
             if (data.destination) {
                 out += `　<span style="color:#5a7c5a;">${zh ? '目的地' : 'Dest'}: ${escapeHtml(data.destination)}</span>`;
             }
