@@ -460,6 +460,17 @@
     </div>
 </section>
 
+    <!-- 4.5 关于我们（内容可在后台 /admin 修改，改完即时生效） -->
+    <section id="about" data-page-node-id="aboutSection" style="background: #f7faf4;">
+        <div class="container" data-page-node-id="aboutContainer">
+            <div class="section-title" id="aboutTitle" data-page-node-id="aboutTitle">关于我们</div>
+            <div id="aboutText" style="max-width: 920px; margin: 0 auto; color: #3c4a3c; line-height: 1.95; font-size: 1rem; text-align: left;" data-page-node-id="aboutText">
+                <p style="margin: 0 0 14px;">ALBB LOGISTICS 是一家专注于中东市场的跨境物流服务商，聚焦沙特阿拉伯与阿联酋双清到门（DDP）专线，为跨境电商卖家与贸易企业提供从发货前处理到末端派送的完整物流解决方案。</p>
+                <p style="margin: 0 0 14px;">我们的服务覆盖空运双清、海运整柜与拼箱、亚马逊 FBA 与 NOON 送仓，以及工程物流与大件运输，并针对沙特、阿联酋两国的清关政策提供全流程清关与合规支持。依托发货前预审机制与全程运踪体系，我们帮助客户提前规避清关与标签风险，让每一票货的运输过程更稳定、更可控。</p>
+            </div>
+        </div>
+    </section>
+
     <!-- 5. 底部转化 + 四个二维码（含视频号） -->
     <section id="contact" data-page-node-id="j7EU2SydSGAT2T0R8G3OgE">
         <div class="container" data-page-node-id="acW3V4cze0kBFAA0oL3s8u">
@@ -540,6 +551,11 @@
 
     let currentLang = 'zh';
 
+    // ⚠️ 必须在 applyLanguage('zh') 首次调用前声明（否则 TDZ：
+    //    Cannot access 'siteContent' before initialization）
+    //    后台内容（公司简介 + 业务卡片）拉取结果
+    let siteContent = null;
+
     // ⚠️ 声明提前：applyLanguage('zh') 首次调用会触发 renderTrackTabs()，
     //    必须在首次调用前完成初始化（避免 TDZ: Cannot access before initialization）
     //
@@ -578,6 +594,8 @@
         }
         // 语言切换时同步刷新站点切换标签
         if (typeof renderTrackTabs === 'function') renderTrackTabs();
+        // 语言切换时同步刷新后台内容（公司简介/业务卡片）
+        if (typeof renderDynamicContent === 'function') renderDynamicContent();
     }
     document.getElementById('langToggle').addEventListener('click', () => {
         const newLang = currentLang === 'zh' ? 'en' : 'zh';
@@ -688,6 +706,70 @@
     document.getElementById('trackBtn').addEventListener('click', handleTrack);
     document.getElementById('trackingNumber').addEventListener('keypress', e => { if(e.key === 'Enter') handleTrack(); });
     renderTrackTabs();
+
+    // ============================================================
+    //  后台内容（公司简介 + 业务卡片）
+    //  从 Worker 的 /api/content 拉取；拿不到就保留页面里的静态默认内容
+    //  在后台 /admin 改完内容，这里会自动更新，无需改代码
+    // ============================================================
+    function renderAbout() {
+        const titleEl = document.getElementById('aboutTitle');
+        const textEl = document.getElementById('aboutText');
+        if (!titleEl || !textEl || !siteContent || !siteContent.about) return;
+        const a = siteContent.about;
+        const zh = currentLang === 'zh';
+        const body = zh ? (a.zh || '') : (a.en || '');
+        if (!body.trim()) return;   // 后台没填英文时不覆盖中文默认，避免空白
+        titleEl.innerText = zh ? (a.zhTitle || '关于我们') : (a.enTitle || 'About Us');
+        textEl.innerHTML = body
+            .split(/\n+/)
+            .map(t => t.trim())
+            .filter(Boolean)
+            .map(t => `<p style="margin: 0 0 14px;">${escapeHtml(t)}</p>`)
+            .join('');
+    }
+
+    function renderServicesFromContent() {
+        const grid = document.querySelector('.services-grid-special');
+        if (!grid || !siteContent || !Array.isArray(siteContent.services) || !siteContent.services.length) return;
+        const zh = currentLang === 'zh';
+        grid.innerHTML = siteContent.services.map(blk => {
+            const title = zh ? (blk.zh || blk.en || '') : (blk.en || blk.zh || '');
+            const bic = blk.icon ? `<i class="${escapeHtml(blk.icon)}"></i> ` : '';
+            const items = (blk.items || []).map(it => {
+                const t = zh ? (it.zh || it.en || '') : (it.en || it.zh || '');
+                if (!t) return '';
+                const iic = it.icon ? `<i class="${escapeHtml(it.icon)}"></i> ` : '';
+                return `<li>${iic}<span>${escapeHtml(t)}</span></li>`;
+            }).join('');
+            if (!title) return '';
+            return `<div class="service-block"><h3>${bic}<span>${escapeHtml(title)}</span></h3><ul>${items}</ul></div>`;
+        }).join('');
+    }
+
+    function renderDynamicContent() {
+        renderAbout();
+        renderServicesFromContent();
+    }
+
+    async function loadSiteContent() {
+        for (const base of TRACK_API_LIST) {
+            try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 8000);
+                const resp = await fetch(base + '/api/content', { signal: ctrl.signal });
+                clearTimeout(timer);
+                if (!resp.ok) continue;
+                const data = await resp.json();
+                if (data && data.ok && data.content) {
+                    siteContent = data.content;
+                    renderDynamicContent();
+                    return;
+                }
+            } catch (e) { /* 换下一个后端 */ }
+        }
+    }
+    loadSiteContent();
 </script>
 
 <!-- 
