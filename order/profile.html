@@ -15,49 +15,44 @@
         <div class="card" style="max-width: 760px">
           <h3>公司资料</h3>
           <p style="font-size: 12.5px; color: #6b7280; margin-bottom: 16px">
-            首次合作请完善以下企业资料，ALBB 将据此建档；后续如需变更请直接修改并保存。
+            以下资料由 ALBB 管理员统一维护，客户仅可查看。如需修改请联系您的 ALBB 对接人。
           </p>
           <div class="form-grid">
             <div class="field">
-              <label class="req">公司名称</label>
-              <input id="company" placeholder="公司全称" />
+              <label>公司名称</label>
+              <input id="company" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
               <label>公司简称</label>
-              <input id="shortName" placeholder="公司简称" />
+              <input id="shortName" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
               <label>客户代码</label>
-              <input id="code" readonly />
+              <input id="code" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
-              <label class="req">联系人</label>
-              <input id="contact" placeholder="联系人姓名" />
+              <label>联系人</label>
+              <input id="contact" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
-              <label class="req">联系电话</label>
-              <input id="phone" placeholder="联系电话" />
+              <label>联系电话</label>
+              <input id="phone" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
               <label>邮箱</label>
-              <input id="email" type="email" placeholder="邮箱" />
+              <input id="email" readonly style="background:#f4f6f9" />
             </div>
             <div class="field">
               <label>微信</label>
-              <input id="wechat" placeholder="微信号" />
+              <input id="wechat" readonly style="background:#f4f6f9" />
             </div>
           </div>
 
           <div class="field" style="margin-top: 16px">
             <label>证件</label>
             <div style="flex: 1">
-              <input type="file" id="idFile" accept=".pdf,.png,.jpg,.jpeg" style="font-size: 13px" />
-              <div class="hint" id="idFileHint">营业执照 / 身份证等，用于清关建档。图片会自动压缩，PDF ≤18MB</div>
+              <div class="hint" id="idFileHint">未上传</div>
             </div>
-          </div>
-
-          <div style="text-align: center; margin-top: 22px">
-            <button class="btn orange" id="btnSave">✔ 确认</button>
           </div>
         </div>
       </div>
@@ -73,7 +68,7 @@
     let idFileKey = "", idFileName = "";
     let existingIdFile = "";
 
-    // 载入现有资料
+    // 载入资料（只读展示）
     (async () => {
       try {
         const { profile: p } = await api("/api/profile");
@@ -89,51 +84,12 @@
         if (idFileKey) {
           existingIdFile = idFileKey;
           document.getElementById("idFileHint").innerHTML =
-            `已上传：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>（重新选择文件可替换）`;
-        }
-      } catch (e) {
-        toast(e.message, "err");
-      }
-    })();
-
-    document.getElementById("btnSave").addEventListener("click", async () => {
-      if (!document.getElementById("company").value.trim()) return toast("请填写公司名称", "err");
-      if (!document.getElementById("contact").value.trim()) return toast("请填写联系人", "err");
-      if (!document.getElementById("phone").value.trim()) return toast("请填写联系电话", "err");
-      const btn = document.getElementById("btnSave");
-      btn.disabled = true;
-      try {
-        const f = document.getElementById("idFile").files[0];
-        if (f) {
-          const r = await uploadOne(f, (msg) => {
-            btn.textContent = msg;
-          });
-          idFileKey = r.key;
-          idFileName = r.name;
-        }
-        await api("/api/profile", {
-          method: "PUT",
-          body: {
-            company: document.getElementById("company").value,
-            shortName: document.getElementById("shortName").value,
-            contact: document.getElementById("contact").value,
-            phone: document.getElementById("phone").value,
-            email: document.getElementById("email").value,
-            wechat: document.getElementById("wechat").value,
-            idFileKey, idFileName,
-          },
-        });
-        toast("保存成功", "ok");
-        if (idFileKey) {
-          document.getElementById("idFileHint").innerHTML =
             `已上传：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>`;
         }
       } catch (e) {
         toast(e.message, "err");
       }
-      btn.disabled = false;
-      btn.textContent = "✔ 确认";
-    });
+    })();
   </script>
 </body>
 </html>

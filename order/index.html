@@ -25,7 +25,7 @@
               </select>
             </div>
             <div class="field">
-              <label class="req">总箱数/总件数</label>
+              <label class="req">总件数</label>
               <input id="pieces" type="number" min="1" placeholder="例如：5" />
             </div>
             <div class="field">
@@ -232,7 +232,7 @@
     function validate() {
       const must = [
         ["channel", "请选择发货渠道"],
-        ["pieces", "请填写总箱数/总件数"],
+        ["pieces", "请填写总件数"],
         ["warehouse", "请选择交货仓库"],
         ["goodsType", "请选择货物性质"],
         ["customs", "请选择是否报关"],
@@ -249,7 +249,7 @@
         }
       }
       if (!Number(document.getElementById("pieces").value)) {
-        toast("总箱数/总件数请填写大于 0 的数字", "err");
+        toast("总件数请填写大于 0 的数字", "err");
         return false;
       }
       const m = modeSelD.value;

@@ -15,12 +15,12 @@
         <div class="card">
           <h3>运踪查询</h3>
           <div class="filters" style="margin-bottom: 0">
-            <input id="trackNo" placeholder="输入物流单号 / 入仓号，例如 ALBG171338" style="flex: 1; min-width: 240px" />
+            <input id="trackNo" placeholder="输入您自己订单的物流单号" style="flex: 1; min-width: 240px" />
             <button class="btn" id="btnTrack">🔍 搜索</button>
             <button class="btn ghost" id="btnReset">重置</button>
           </div>
           <div class="hint" style="margin-top: 8px">
-            支持三站单号自动识别：立信诺（ALBG…）/ 国际专线 / 海湾物流。也可先在下方列表点「查运踪」带出单号。
+            仅支持查询您自己订单的运踪；单号可在下方「我的在途订单」中查看。
           </div>
         </div>
 
@@ -48,9 +48,35 @@
 
     const resultBox = document.getElementById("result");
 
+    // ---- 权限锁死：只能查询自己订单的单号 ----
+    let allowedNos = null; // Set：自己所有订单的 物流单号/订单号/唛头号
+    async function getAllowedNos() {
+      if (allowedNos) return allowedNos;
+      const set = new Set();
+      try {
+        const data = await api("/api/orders");
+        for (const o of data.orders || []) {
+          for (const k of [o.trackingNo, o.orderNo, o.asn, o.markingNo]) {
+            if (k) set.add(String(k).trim().toUpperCase());
+          }
+        }
+      } catch (e) {
+        /* 加载失败时放行为空集合，下方仍会拦截 */
+      }
+      allowedNos = set;
+      return set;
+    }
+
     async function doTrack(no) {
       no = (no || document.getElementById("trackNo").value).trim();
       if (!no) return toast("请输入单号", "err");
+      const allowed = await getAllowedNos();
+      if (!allowed.has(no.toUpperCase())) {
+        resultBox.style.display = "block";
+        resultBox.innerHTML =
+          '<div class="empty-tip">⚠️ 只能查询您自己订单的运踪。请输入您订单列表中的物流单号，或在下方「我的在途订单」中点击「查运踪」。</div>';
+        return;
+      }
       resultBox.style.display = "block";
       resultBox.innerHTML = '<div style="text-align:center;color:#6b7280;padding:24px">查询中…</div>';
       try {
@@ -58,10 +84,7 @@
         const data = await resp.json();
         const tracks = data.tracks || [];
         resultBox.innerHTML = `
-          <h3>查询结果 · ${esc(data.trackingNo || no)}
-            ${data.source ? `<span class="badge">${esc(data.source)}</span>` : ""}
-            ${data.destination ? `<span style="font-size:12.5px;color:#6b7280">目的地：${esc(data.destination)}</span>` : ""}
-          </h3>
+          <h3>查询结果 · ${esc(data.trackingNo || no)}</h3>
           ${data.currentActivity ? `<p style="margin:8px 0 4px;font-weight:600;color:#2e7d32">${esc(data.currentActivity)}</p>` : ""}
           ${
             tracks.length
