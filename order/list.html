@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>订单列表 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <div class="topbar" id="topbar"></div>
+      <div class="content">
+        <div class="tabs" id="tabs"></div>
+        <div class="filters">
+          <input type="date" id="fFrom" title="入库日期从" />
+          <span style="color: #9ca3af">to</span>
+          <input type="date" id="fTo" title="入库日期至" />
+          <select id="fStatus">
+            <option value="">订单状态</option>
+            <option>待入仓</option><option>已入库</option><option>已出仓</option>
+            <option>派送中</option><option>派送完成</option><option>客户已接收</option>
+          </select>
+          <input id="fKeyword" placeholder="订单号 / 唛头 / 物流单号" style="width: 190px" />
+          <button class="btn sm" onclick="loadOrders()">🔍 搜索</button>
+          <button class="btn sm orange" onclick="location.href='index.html'">＋ 新建订单</button>
+        </div>
+
+        <div class="card table-wrap" style="padding: 8px 0 0">
+          <table class="grid" id="tbl">
+            <thead>
+              <tr>
+                <th>#</th><th>入库日期</th><th>订单号</th><th>唛头</th><th>仓库类型</th>
+                <th>箱数</th><th>重量(KG)</th><th>计费重</th><th>计费体积</th>
+                <th>单价</th><th>最新动态</th><th>时间</th><th>预计出仓</th>
+                <th>签收时间</th><th>备注</th><th>物流单号</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div class="empty-tip" id="empty" style="display: none">暂无订单，点击右上角「＋ 新建订单」开始下单</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 订单详情弹窗 -->
+  <div class="modal-mask" id="detailMask" style="display: none">
+    <div class="modal" id="detailBox"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    renderShell("", "订单列表");
+
+    // 频道标签
+    const params = new URLSearchParams(location.search);
+    let curChannel = params.get("channel") || "";
+    const tabsEl = document.getElementById("tabs");
+    tabsEl.innerHTML =
+      `<a class="tab${!curChannel ? " active" : ""}" href="list.html">全部</a>` +
+      CHANNELS.map(
+        (c) => `<a class="tab${curChannel === c.key ? " active" : ""}" href="list.html?channel=${c.key}">${c.name}</a>`
+      ).join("");
+
+    function statusPill(s) {
+      return `<span class="status-pill s-${esc(s)}">${esc(s || "-")}</span>`;
+    }
+
+    let fullOrders = {}; // id → 订单对象（列表行打印唛头用）
+
+    async function loadOrders() {
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      const qs = new URLSearchParams();
+      if (curChannel) qs.set("channel", curChannel);
+      try {
+        const data = await api("/api/orders?" + qs.toString());
+        let orders = data.orders || [];
+        const from = document.getElementById("fFrom").value;
+        const to = document.getElementById("fTo").value;
+        const st = document.getElementById("fStatus").value;
+        const kw = document.getElementById("fKeyword").value.trim().toUpperCase();
+        if (from) orders = orders.filter((o) => o.createdAt >= from);
+        if (to) orders = orders.filter((o) => o.createdAt <= to);
+        if (st) orders = orders.filter((o) => o.status === st);
+        if (kw)
+          orders = orders.filter(
+            (o) =>
+              (o.orderNo || "").toUpperCase().includes(kw) ||
+              (o.markingNo || "").toUpperCase().includes(kw) ||
+              (o.trackingNo || "").toUpperCase().includes(kw)
+          );
+        document.getElementById("empty").style.display = orders.length ? "none" : "block";
+        const hl = params.get("highlight");
+        fullOrders = {};
+        orders.forEach((o) => (fullOrders[o.id] = o));
+        tbody.innerHTML = orders
+          .map(
+            (o, i) => `<tr${hl === o.id ? ' style="background:#fff7e0"' : ""}>
+              <td>${i + 1}</td>
+              <td>${esc(o.createdAt)}</td>
+              <td><b style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</b></td>
+              <td>${esc(o.markingNo || "-")}</td>
+              <td>${esc(o.warehouse)}</td>
+              <td>${esc(o.pieces)}</td>
+              <td>${esc(o.weightKg || "-")}</td>
+              <td>${o.chargeWeight ? `<span class="badge">${esc(fmtPrice(o.chargeWeight))}</span>` : "-"}</td>
+              <td>${o.chargeVolume ? `<span class="badge">${esc(fmtPrice(o.chargeVolume))}</span>` : "-"}</td>
+              <td>${o.unitPrice ? `<span class="badge">￥${esc(fmtPrice(o.unitPrice))}</span>` : "-"}</td>
+              <td>${statusPill(o.status)}</td>
+              <td>${esc(o.statusTime || "-")}</td>
+              <td>${esc(o.etaOut || "-")}</td>
+              <td>${esc(o.signedTime || "-")}</td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(o.remark || "-")}</td>
+              <td>${esc(o.trackingNo || "-")}</td>
+              <td>
+                <a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(fullOrders['${o.id}'])" title="打印外箱唛头（10×10cm，每箱一张）">🖨 唛头</a>
+                <a href="javascript:void(0)" style="color:#e09612" onclick="showDetail('${o.id}')">📝 详情</a>
+              </td>
+            </tr>`
+          ).join("");
+      } catch (e) {
+        tbody.innerHTML = "";
+        toast(e.message, "err");
+      }
+    }
+
+    async function showDetail(id) {
+      try {
+        const { order: o } = await api("/api/orders/" + id);
+        fullOrders[o.id] = o;
+        const row = (k, v) => `<div class="field" style="margin-bottom:10px"><label style="width:96px">${k}</label><div style="flex:1">${esc(v || "-")}</div></div>`;
+        const trackHist = (o.history || [])
+          .map((h) => `<li><div class="t-time">${esc(h.time)} · ${esc(h.by)}</div><div class="t-status">${esc(h.status)}</div></li>`)
+          .join("");
+        const atts = [
+          ...(o.attachments || []),
+          ...(o.attachmentKey ? [{ key: o.attachmentKey, name: o.attachmentName || "附件" }] : []),
+        ];
+        const attHtml = atts.length
+          ? atts
+              .map(
+                (a) =>
+                  `<a style="color:#2e7d32;margin-right:12px" href="${CFG.API_BASE}/api/file/${encodeURIComponent(a.key)}" target="_blank">${esc(a.name)}${
+                    a.size ? `<span style="color:#9ca3af">(${fmtSize(a.size)})</span>` : ""
+                  }</a>`
+              )
+              .join("")
+          : "未上传";
+        document.getElementById("detailBox").innerHTML = `
+          <h3>订单详情 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(channelName(o.channel))}）</h3>
+          <div class="form-grid">
+            ${row("唛头", o.markingNo || "-")}
+            ${row("状态", statusPill(o.status))}
+            ${row("入库日期", o.createdAt)}
+            ${row("交货仓库", o.warehouse)}
+            ${row("箱数/件数", o.pieces)}
+            ${row("重量(KG)", o.weightKg)}
+            ${row("体积(CBM)", o.volumeCbm)}
+            ${row("计费重", o.chargeWeight)}
+            ${row("计费体积", o.chargeVolume)}
+            ${row("单价", o.unitPrice ? "￥" + o.unitPrice : "")}
+            ${row("总金额", o.totalAmount ? "￥" + o.totalAmount : "")}
+            ${row("是否报关", o.customs)}
+            ${row("货物性质", o.goodsType)}
+            ${row("派送方式", o.deliveryMode)}
+            ${row("派送城市", o.deliveryCity)}
+            ${row("派送类型", o.deliveryType)}
+            ${row("预计出仓", o.etaOut)}
+            ${row("签收时间", o.signedTime)}
+            ${row("签收备注", o.signedNote)}
+            ${row("物流单号", o.trackingNo)}
+            ${row("备注", o.remark)}
+            ${row("发货人", o.senderName + (o.senderPhone ? " / " + o.senderPhone : ""))}
+            ${row("发货地址", o.senderAddress)}
+            <div class="field" style="margin-bottom:10px"><label style="width:96px">附件</label><div style="flex:1">${attHtml}</div></div>
+          </div>
+          <h3 style="margin-top:18px">物流动态</h3>
+          <ul class="timeline">${trackHist || "<li><div class='t-status'>暂无动态</div></li>"}</ul>
+          <div class="modal-foot">
+            <button class="btn orange" onclick="printLabels(fullOrders['${o.id}'])">🖨 打印唛头（10×10cm）</button>
+            ${o.trackingNo ? `<button class="btn ghost" onclick="location.href='tracking.html?no=${encodeURIComponent(o.trackingNo)}'">🔍 查运踪</button>` : ""}
+            <button class="btn" onclick="document.getElementById('detailMask').style.display='none'">关 闭</button>
+          </div>`;
+        document.getElementById("detailMask").style.display = "flex";
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    }
+
+    document.getElementById("detailMask").addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
+    });
+
+    loadOrders();
+  </script>
+</body>
+</html>

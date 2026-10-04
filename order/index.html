@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新建订单 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <div class="topbar" id="topbar"></div>
+      <div class="content">
+        <div class="card">
+          <h3>订单信息</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label class="req">业务频道</label>
+              <select id="channel">
+                <option value="saudi-air">沙特空运</option>
+                <option value="saudi-sea">沙特海运</option>
+                <option value="uae-air">阿联酋空运</option>
+                <option value="uae-sea">阿联酋海运</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>箱数/件数</label>
+              <input id="pieces" type="number" min="1" placeholder="例如：5" />
+            </div>
+            <div class="field">
+              <label class="req">交货仓库</label>
+              <select id="warehouse">
+                <option value="">请选择</option>
+                <option>义乌仓</option>
+                <option>广州仓</option>
+                <option>深圳仓</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="req">货物性质</label>
+              <select id="goodsType">
+                <option value="">请选择或填写方式</option>
+                <option>普货</option>
+                <option>普货带电</option>
+                <option>敏感货（含牌/含磁/膏体等）</option>
+                <option>大货/柜货</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="req">运输方式</label>
+              <select id="transportMode" disabled>
+                <option value="">—</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>备注</label>
+              <input id="remark" placeholder="货物备注、特殊要求等" />
+            </div>
+            <div class="field">
+              <label class="req">是否报关</label>
+              <select id="customs">
+                <option value="否">不报关（双清包税）</option>
+                <option value="是">需要报关退税</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>包裹</label>
+              <input id="parcelNote" placeholder="请提供箱唛或包裹信息（选填）" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>派送信息</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label class="req">派送方式</label>
+              <select id="deliveryMode">
+                <option value="">请选择</option>
+                <option>快递派送</option>
+                <option>卡车派送</option>
+                <option>沙特自提</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="req">派送城市</label>
+              <input id="deliveryCity" list="cityList" placeholder="请选择或输入城市" />
+              <datalist id="cityList">
+                <option>利雅得</option><option>吉达</option><option>达曼</option>
+                <option>迪拜</option><option>阿布扎比</option><option>沙迦</option>
+              </datalist>
+            </div>
+            <div class="field">
+              <label>派送类型</label>
+              <select id="deliveryType">
+                <option value="">请选择</option>
+                <option>派送到门</option>
+                <option>派送到仓</option>
+                <option>机场/港口自提</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>发货资料</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label class="req">发货人</label>
+              <input id="senderName" placeholder="发货人姓名" />
+            </div>
+            <div class="field">
+              <label class="req">发货人电话</label>
+              <input id="senderPhone" placeholder="发货人联系电话" />
+            </div>
+            <div class="field" style="grid-column: 1 / -1">
+              <label>发货地址</label>
+              <input id="senderAddress" placeholder="省市区 + 详细地址（选填）" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>订仓表（Excel）</h3>
+          <div class="field">
+            <label>上传订仓表</label>
+            <input type="file" id="packingFile" accept=".xlsx,.xls" />
+          </div>
+          <div class="hint" style="margin: 8px 0 12px 98px">
+            只支持 Excel 格式（.xlsx / .xls，≤18MB）。产品图片请直接插入表格内、放在对应品名那一行。<br />
+            还没有模板？<a href="订仓装箱单模板.xlsx" download>下载订仓装箱单模板</a>
+          </div>
+          <div id="fileList" style="margin-left: 98px; font-size: 12.5px; color: #6b7280; line-height: 1.9"></div>
+        </div>
+
+        <div class="card">
+          <div style="display: flex; gap: 12px; justify-content: center">
+            <button class="btn orange" id="btnSubmit">✔ 确 认</button>
+            <button class="btn ghost" id="btnReset">⟳ 重置表单</button>
+          </div>
+          <p style="margin-top: 18px; font-size: 12.5px; color: #6b7280; line-height: 1.9">
+            请注意：<br />
+            义乌仓和广州仓收货时间一致：周一至周六 10:00-19:00，周日不收货；<br />
+            午间休息：12:00-13:30 &nbsp;/&nbsp; 傍晚：17:30-19:00 之外正常收货；<br />
+            感谢你的理解与支持。下单后请将货物寄到对应仓库，到仓后 ALBB 会在 24 小时内入库并录入计费重。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    const user = requireLogin();
+    renderShell("new", "新建订单");
+
+    // 频道联动运输方式
+    const channelSel = document.getElementById("channel");
+    const modeSel = document.getElementById("transportMode");
+    function syncMode() {
+      const v = channelSel.value;
+      modeSel.innerHTML = `<option selected>${v.endsWith("-air") ? "空运" : "海运"}</option>`;
+    }
+    channelSel.addEventListener("change", syncMode);
+
+    // URL 预选频道：index.html?channel=saudi-sea
+    const q = new URLSearchParams(location.search).get("channel");
+    if (q && CHANNELS.some((c) => c.key === q)) channelSel.value = q;
+    syncMode();
+
+    // 附件选择后即时预览（含压缩预估）
+    const packingInput = document.getElementById("packingFile");
+    packingInput.addEventListener("change", () => {
+      const files = Array.from(packingInput.files || []);
+      document.getElementById("fileList").innerHTML = files.length
+        ? files
+            .map(
+              (f) =>
+                `· ${esc(f.name)} <span style="color:${isImageFile(f) ? "#16a34a" : "#6b7280"}">${fmtSize(f.size)}${
+                  isImageFile(f) ? "（提交时自动压缩）" : ""
+                }</span>`
+            )
+            .join("<br />")
+        : "";
+    });
+
+    document.getElementById("btnReset").addEventListener("click", () => location.reload());
+
+    document.getElementById("btnSubmit").addEventListener("click", async () => {
+      const need = [
+        ["warehouse", "请选择交货仓库"],
+        ["goodsType", "请选择货物性质"],
+        ["deliveryMode", "请选择派送方式"],
+        ["deliveryCity", "请填写派送城市"],
+        ["senderName", "请填写发货人"],
+        ["senderPhone", "请填写发货人电话"],
+      ];
+      for (const [id, msg] of need) {
+        if (!document.getElementById(id).value.trim()) {
+          toast(msg, "err");
+          document.getElementById(id).focus();
+          return;
+        }
+      }
+      if (!Number(document.getElementById("pieces").value)) {
+        toast("请填写箱数/件数", "err");
+        return;
+      }
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+      btn.textContent = "提交中…";
+      try {
+        let attachments = [];
+        const files = packingInput.files;
+        if (files && files.length) {
+          attachments = await uploadFiles(files, (msg) => {
+            btn.textContent = msg;
+          });
+        }
+        const data = await api("/api/orders", {
+          method: "POST",
+          body: {
+            channel: channelSel.value,
+            warehouse: document.getElementById("warehouse").value,
+            customs: document.getElementById("customs").value,
+            pieces: Number(document.getElementById("pieces").value),
+            goodsType: document.getElementById("goodsType").value,
+            parcelNote: document.getElementById("parcelNote").value,
+            remark: document.getElementById("remark").value,
+            deliveryMode: document.getElementById("deliveryMode").value,
+            deliveryCity: document.getElementById("deliveryCity").value,
+            deliveryType: document.getElementById("deliveryType").value,
+            senderName: document.getElementById("senderName").value,
+            senderPhone: document.getElementById("senderPhone").value,
+            senderAddress: document.getElementById("senderAddress").value,
+            attachments,
+          },
+        });
+        toast(`下单成功！订单号 ${data.order.orderNo} · 唛头 ${data.order.markingNo}`, "ok");
+        // 下单成功即可打印外箱唛头（10×10cm，每箱一张）
+        if (confirm(
+          `下单成功！\n订单号：${data.order.orderNo}\n唛头：${data.order.markingNo}\n箱数：${data.order.pieces} 件\n\n是否立即打印外箱唛头 LABEL（10×10cm，共 ${data.order.pieces} 张）？`
+        )) {
+          printLabels(data.order);
+        }
+        setTimeout(() => {
+          location.href = "list.html?channel=" + data.order.channel + "&highlight=" + data.order.id;
+        }, 1500);
+      } catch (e) {
+        toast(e.message, "err");
+        btn.disabled = false;
+        btn.textContent = "✔ 确 认";
+      }
+    });
+  </script>
+</body>
+</html>

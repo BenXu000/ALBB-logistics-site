@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理后台 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ===== 登录界面 ===== -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="brand">ALBB LOGISTICS</div>
+        <div class="sub">内部管理后台</div>
+      </div>
+      <h1>管理员登录</h1>
+      <div class="field" style="margin-bottom: 20px">
+        <label style="width: 74px">管理密码</label>
+        <input id="adminPwd" type="password" placeholder="Cloudflare 后台设置的 ADMIN_TOKEN" />
+      </div>
+      <button class="btn" id="btnAdminLogin" style="width: 100%; justify-content: center; padding: 11px">登 录</button>
+      <div class="login-foot"><a href="login.html">← 返回客户登录</a></div>
+    </div>
+  </div>
+
+  <!-- ===== 管理界面 ===== -->
+  <div class="layout" id="adminView" style="display: none">
+    <aside class="sidebar">
+      <div class="side-logo">
+        <div class="brand">ALBB LOGISTICS</div>
+        <div class="sub">内部管理后台</div>
+      </div>
+      <div class="side-group bar">☰ 管理菜单</div>
+      <a class="side-link" data-view="orders" href="javascript:void(0)"><span class="ico">◉</span>订单管理</a>
+      <a class="side-link" data-view="users" href="javascript:void(0)"><span class="ico">◉</span>客户账号</a>
+      <a class="side-link" href="index.html"><span class="ico">⊕</span>代客下单</a>
+      <div class="side-bottom">
+        <button class="btn ghost sm" onclick="logout()">退出登录</button>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <div class="page-title" id="viewTitle">订单管理</div>
+        <div class="user-box"><span class="badge orange">管理员</span></div>
+      </div>
+      <div class="content">
+        <!-- 订单管理 -->
+        <div id="view-orders">
+          <div class="card" style="padding: 12px 16px; font-size: 13px" id="storageCard">
+            存储用量：统计中…
+          </div>
+          <div class="tabs" id="adminTabs"></div>
+          <div class="filters">
+            <select id="aStatus">
+              <option value="">订单状态</option>
+              <option>待入仓</option><option>已入库</option><option>已出仓</option>
+              <option>派送中</option><option>派送完成</option><option>客户已接收</option>
+            </select>
+            <input id="aKeyword" placeholder="订单号 / 唛头 / 客户代码 / 物流单号" style="width: 220px" />
+            <button class="btn sm" onclick="loadAdminOrders()">🔍 搜索</button>
+          </div>
+          <div class="card table-wrap" style="padding: 8px 0 0">
+            <table class="grid">
+              <thead>
+                <tr>
+                  <th>#</th><th>入库日期</th><th>客户</th><th>订单号</th><th>唛头</th><th>频道</th>
+                  <th>仓库</th><th>箱数</th><th>重量(KG)</th><th>计费重</th><th>单价</th>
+                  <th>最新动态</th><th>签收时间</th><th>物流单号</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="aOrdersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 客户账号 -->
+        <div id="view-users" style="display: none">
+          <div class="filters">
+            <button class="btn sm orange" onclick="openUserModal()">＋ 开通客户账号</button>
+          </div>
+          <div class="card table-wrap" style="padding: 8px 0 0">
+            <table class="grid">
+              <thead>
+                <tr>
+                  <th>#</th><th>客户代码</th><th>公司名称</th><th>联系人</th><th>电话</th>
+                  <th>邮箱</th><th>微信</th><th>开通日期</th><th>状态</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="aUsersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 订单编辑弹窗 -->
+  <div class="modal-mask" id="orderMask" style="display: none">
+    <div class="modal" id="orderBox"></div>
+  </div>
+  <!-- 账号弹窗 -->
+  <div class="modal-mask" id="userMask" style="display: none">
+    <div class="modal" id="userBox" style="width: 560px"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    const TOKEN_KEY = "albb_order_token";
+    const USER_KEY = "albb_order_user";
+
+    // ---------- 登录 ----------
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+    const savedUser = getLoginUser();
+    if (savedToken && savedUser && savedUser.role === "admin") showAdmin();
+
+    document.getElementById("btnAdminLogin").addEventListener("click", async () => {
+      try {
+        const resp = await fetch(CFG.API_BASE + "/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: document.getElementById("adminPwd").value }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.error || "登录失败");
+        saveLogin(data.token, { code: "ADMIN", role: "admin" });
+        showAdmin();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+    document.getElementById("adminPwd").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("btnAdminLogin").click();
+    });
+
+    function showAdmin() {
+      document.getElementById("loginView").style.display = "none";
+      document.getElementById("adminView").style.display = "flex";
+      loadAdminOrders();
+      loadStorage();
+      document.querySelectorAll(".side-link[data-view]").forEach((a) =>
+        a.addEventListener("click", () => switchView(a.dataset.view))
+      );
+    }
+
+    async function loadStorage() {
+      try {
+        const s = await api("/api/stats");
+        const usedMB = s.bytes / 1024 / 1024;
+        const quotaMB = s.quotaBytes / 1024 / 1024;
+        const pct = Math.min(100, (s.bytes / s.quotaBytes) * 100);
+        const color = pct > 80 ? "#dc2626" : pct > 60 ? "#f5a623" : "#16a34a";
+        document.getElementById("storageCard").innerHTML = `
+          <span style="color:#6b7280">附件存储用量（Cloudflare KV 免费额度 1GB）：</span>
+          <b style="color:${color}">${usedMB.toFixed(1)} MB / ${quotaMB.toFixed(0)} MB（${pct.toFixed(1)}%）</b>
+          <span style="color:#6b7280">　共 ${s.count} 个附件</span>
+          ${pct > 80 ? '<div style="color:#dc2626;margin-top:6px">⚠️ 接近免费额度上限，建议开通 R2 或清理旧订单附件</div>' : ""}`;
+      } catch (e) {
+        document.getElementById("storageCard").textContent = "存储用量：读取失败（Worker 需为最新版本）";
+      }
+    }
+    function switchView(v) {
+      document.getElementById("view-orders").style.display = v === "orders" ? "block" : "none";
+      document.getElementById("view-users").style.display = v === "users" ? "block" : "none";
+      document.getElementById("viewTitle").textContent = v === "orders" ? "订单管理" : "客户账号";
+      document.querySelectorAll(".side-link[data-view]").forEach((a) => a.classList.toggle("active", a.dataset.view === v));
+      if (v === "users") loadUsers();
+    }
+
+    // ---------- 订单管理 ----------
+    let curTab = "";
+    let allOrders = {}; // id → 订单对象（打印唛头用）
+    const tabsEl = document.getElementById("adminTabs");
+    tabsEl.innerHTML =
+      `<a class="tab${!curTab ? " active" : ""}" href="javascript:void(0)" data-ch="">全部</a>` +
+      CHANNELS.map((c) => `<a class="tab" data-ch="${c.key}" href="javascript:void(0)">${c.name}</a>`).join("");
+    tabsEl.querySelectorAll(".tab").forEach((t) =>
+      t.addEventListener("click", () => {
+        curTab = t.dataset.ch;
+        tabsEl.querySelectorAll(".tab").forEach((x) => x.classList.toggle("active", x === t));
+        loadAdminOrders();
+      })
+    );
+
+    async function loadAdminOrders() {
+      const body = document.getElementById("aOrdersBody");
+      body.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      try {
+        const qs = new URLSearchParams();
+        if (curTab) qs.set("channel", curTab);
+        const data = await api("/api/orders?" + qs.toString());
+        let orders = data.orders || [];
+        const st = document.getElementById("aStatus").value;
+        const kw = document.getElementById("aKeyword").value.trim().toUpperCase();
+        if (st) orders = orders.filter((o) => o.status === st);
+        if (kw)
+          orders = orders.filter(
+            (o) =>
+              (o.orderNo || "").toUpperCase().includes(kw) ||
+              (o.markingNo || "").toUpperCase().includes(kw) ||
+              (o.code || "").toUpperCase().includes(kw) ||
+              (o.trackingNo || "").toUpperCase().includes(kw)
+          );
+        allOrders = {};
+        orders.forEach((o) => (allOrders[o.id] = o));
+        body.innerHTML = orders.length
+          ? orders
+              .map(
+                (o, i) => `<tr>
+                  <td>${i + 1}</td>
+                  <td>${esc(o.createdAt)}</td>
+                  <td><b>${esc(o.code)}</b></td>
+                  <td><b style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</b></td>
+                  <td>${esc(o.markingNo || "-")}</td>
+                  <td>${esc(channelName(o.channel))}</td>
+                  <td>${esc(o.warehouse)}</td>
+                  <td>${esc(o.pieces)}</td>
+                  <td>${esc(o.weightKg || "-")}</td>
+                  <td>${o.chargeWeight ? `<span class="badge">${esc(fmtPrice(o.chargeWeight))}</span>` : '<span class="badge gray">待录</span>'}</td>
+                  <td>${o.unitPrice ? `<span class="badge">￥${esc(fmtPrice(o.unitPrice))}</span>` : "-"}</td>
+                  <td><span class="status-pill s-${esc(o.status)}">${esc(o.status)}</span></td>
+                  <td>${esc(o.signedTime || "-")}</td>
+                  <td>${esc(o.trackingNo || "-")}</td>
+                  <td>
+                    <a href="javascript:void(0)" style="color:#e09612" onclick="openOrderEdit('${o.id}')">✏️ 录入/编辑</a>
+                    &nbsp;<a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(allOrders['${o.id}'])" title="打印外箱唛头（10×10cm）">🖨 唛头</a>
+                  </td>
+                </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="15" style="text-align:center;color:#6b7280;padding:30px">暂无订单</td></tr>';
+      } catch (e) {
+        body.innerHTML = "";
+        toast(e.message, "err");
+      }
+    }
+
+    async function openOrderEdit(id) {
+      try {
+        const { order: o } = await api("/api/orders/" + id);
+        const inp = (k, label, type = "text") =>
+          `<div class="field" style="margin-bottom:12px"><label style="width:92px">${label}</label><input id="oe_${k}" type="${type}" value="${esc(o[k] ?? "")}" /></div>`;
+        const sel = (k, label, opts) =>
+          `<div class="field" style="margin-bottom:12px"><label style="width:92px">${label}</label><select id="oe_${k}">${opts
+            .map((x) => `<option${o[k] === x ? " selected" : ""}>${x}</option>`)
+            .join("")}</select></div>`;
+        const attList = [
+          ...(o.attachments || []),
+          ...(o.attachmentKey ? [{ key: o.attachmentKey, name: o.attachmentName || "附件" }] : []),
+        ];
+        allOrders[o.id] = o;
+        document.getElementById("orderBox").innerHTML = `
+          <h3>录入订单 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(o.code)} / ${esc(channelName(o.channel))}）· 唛头 ${esc(o.markingNo || "-")}</h3>
+          <div class="form-grid">
+            ${sel("status", "最新动态", ["待入仓", "已入库", "已出仓", "派送中", "派送完成", "客户已接收"])}
+            ${inp("statusTime", "动态时间", "date")}
+            ${inp("weightKg", "重量(KG)", "number")}
+            ${inp("volumeCbm", "体积(CBM)", "number")}
+            ${inp("chargeWeight", "计费重", "number")}
+            ${inp("chargeVolume", "计费体积", "number")}
+            ${inp("unitPrice", "单价(￥)", "number")}
+            ${inp("totalAmount", "总金额(￥)", "number")}
+            ${inp("etaOut", "预计出仓", "date")}
+            ${inp("signedTime", "签收时间", "date")}
+            ${inp("trackingNo", "物流单号")}
+            ${inp("warehouse", "交货仓库")}
+            ${inp("signedNote", "签收备注")}
+            ${inp("pieces", "箱数", "number")}
+          </div>
+          <div class="field" style="margin-bottom:12px"><label style="width:92px">备注</label><input id="oe_remark" value="${esc(o.remark || "")}" /></div>
+          <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
+            客户发货资料：${esc(o.senderName || "-")} / ${esc(o.senderPhone || "-")} / ${esc(o.senderAddress || "-")} ·
+            派送：${esc(o.deliveryMode || "-")} ${esc(o.deliveryCity || "-")} ${esc(o.deliveryType || "-")} ·
+            货物性质：${esc(o.goodsType || "-")} · 报关：${esc(o.customs || "-")}
+          </p>
+          <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
+            附件（${attList.length}）：
+            ${attList.length
+              ? attList
+                  .map(
+                    (a) =>
+                      `<a style="color:#2e7d32;margin-right:10px" href="${CFG.API_BASE}/api/file/${encodeURIComponent(a.key)}" target="_blank">${esc(a.name)}${
+                        a.size ? `<span style="color:#9ca3af">(${fmtSize(a.size)})</span>` : ""
+                      }</a>`
+                  )
+                  .join("")
+              : "无"}
+          </p>
+          <div class="modal-foot">
+            <button class="btn ghost" onclick="printLabels(allOrders['${o.id}'])">🖨 打印唛头</button>
+            <button class="btn ghost" onclick="document.getElementById('orderMask').style.display='none'">取消</button>
+            <button class="btn orange" id="oeSave">✔ 保存</button>
+          </div>`;
+        document.getElementById("orderMask").style.display = "flex";
+        document.getElementById("oeSave").addEventListener("click", async () => {
+          const val = (k) => document.getElementById("oe_" + k).value;
+          const num = (k) => (val(k) === "" ? 0 : Number(val(k)));
+          try {
+            await api("/api/orders/" + id, {
+              method: "PUT",
+              body: {
+                status: val("status"),
+                statusTime: val("statusTime"),
+                weightKg: num("weightKg"),
+                volumeCbm: num("volumeCbm"),
+                chargeWeight: num("chargeWeight"),
+                chargeVolume: num("chargeVolume"),
+                unitPrice: num("unitPrice"),
+                totalAmount: num("totalAmount"),
+                etaOut: val("etaOut"),
+                signedTime: val("signedTime"),
+                signedNote: val("signedNote"),
+                trackingNo: val("trackingNo"),
+                warehouse: val("warehouse"),
+                pieces: num("pieces"),
+                remark: val("remark"),
+              },
+            });
+            toast("保存成功", "ok");
+            document.getElementById("orderMask").style.display = "none";
+            loadAdminOrders();
+          } catch (e) {
+            toast(e.message, "err");
+          }
+        });
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    }
+    document.getElementById("orderMask").addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
+    });
+
+    // ---------- 客户账号 ----------
+    async function loadUsers() {
+      const body = document.getElementById("aUsersBody");
+      body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      try {
+        const { users } = await api("/api/users");
+        body.innerHTML = users.length
+          ? users
+              .map(
+                (u, i) => `<tr>
+                  <td>${i + 1}</td>
+                  <td><b>${esc(u.code)}</b></td>
+                  <td>${esc(u.company || "-")}</td>
+                  <td>${esc(u.contact || "-")}</td>
+                  <td>${esc(u.phone || "-")}</td>
+                  <td>${esc(u.email || "-")}</td>
+                  <td>${esc(u.wechat || "-")}</td>
+                  <td>${esc(u.createdAt || "-")}</td>
+                  <td>${u.disabled ? '<span class="badge gray">已停用</span>' : '<span class="badge green">正常</span>'}</td>
+                  <td>
+                    <a href="javascript:void(0)" style="color:#2e7d32" onclick="resetPwd('${u.code}')">重置密码</a>
+                    &nbsp;
+                    <a href="javascript:void(0)" style="color:${u.disabled ? "#16a34a" : "#dc2626"}" onclick="toggleUser('${u.code}',${u.disabled})">${u.disabled ? "启用" : "停用"}</a>
+                  </td>
+                </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:30px">还没有客户账号，点击上方「＋ 开通客户账号」</td></tr>';
+      } catch (e) {
+        body.innerHTML = "";
+        toast(e.message, "err");
+      }
+    }
+
+    function openUserModal() {
+      document.getElementById("userBox").innerHTML = `
+        <h3>开通客户账号</h3>
+        <div class="form-grid">
+          <div class="field" style="margin-bottom:12px"><label style="width:80px" class="req">客户代码</label><input id="nu_code" placeholder="例如 ALBG0001" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px" class="req">初始密码</label><input id="nu_password" placeholder="至少 6 位" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">公司名称</label><input id="nu_company" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">联系人</label><input id="nu_contact" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">电话</label><input id="nu_phone" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">邮箱</label><input id="nu_email" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">微信</label><input id="nu_wechat" /></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn ghost" onclick="document.getElementById('userMask').style.display='none'">取消</button>
+          <button class="btn orange" id="nuSave">✔ 开通</button>
+        </div>`;
+      document.getElementById("userMask").style.display = "flex";
+      document.getElementById("nuSave").addEventListener("click", async () => {
+        try {
+          await api("/api/users", {
+            method: "POST",
+            body: {
+              code: document.getElementById("nu_code").value,
+              password: document.getElementById("nu_password").value,
+              company: document.getElementById("nu_company").value,
+              contact: document.getElementById("nu_contact").value,
+              phone: document.getElementById("nu_phone").value,
+              email: document.getElementById("nu_email").value,
+              wechat: document.getElementById("nu_wechat").value,
+            },
+          });
+          toast("账号已开通", "ok");
+          document.getElementById("userMask").style.display = "none";
+          loadUsers();
+        } catch (e) {
+          toast(e.message, "err");
+        }
+      });
+    }
+
+    async function resetPwd(code) {
+      const pwd = prompt(`为 ${code} 设置新密码（至少 6 位）：`);
+      if (!pwd) return;
+      try {
+        await api("/api/users/" + code, { method: "PUT", body: { password: pwd } });
+        toast("密码已重置", "ok");
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    }
+    async function toggleUser(code, disabled) {
+      try {
+        await api("/api/users/" + code, { method: "PUT", body: { disabled: !disabled } });
+        loadUsers();
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    }
+    document.getElementById("userMask").addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>公司资料 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <div class="topbar" id="topbar"></div>
+      <div class="content">
+        <div class="card" style="max-width: 760px">
+          <h3>公司资料</h3>
+          <p style="font-size: 12.5px; color: #6b7280; margin-bottom: 16px">
+            首次合作请完善以下企业资料，ALBB 将据此建档；后续如需变更请直接修改并保存。
+          </p>
+          <div class="form-grid">
+            <div class="field">
+              <label class="req">公司名称</label>
+              <input id="company" placeholder="公司全称" />
+            </div>
+            <div class="field">
+              <label>公司简称</label>
+              <input id="shortName" placeholder="公司简称" />
+            </div>
+            <div class="field">
+              <label>客户代码</label>
+              <input id="code" readonly />
+            </div>
+            <div class="field">
+              <label class="req">联系人</label>
+              <input id="contact" placeholder="联系人姓名" />
+            </div>
+            <div class="field">
+              <label class="req">联系电话</label>
+              <input id="phone" placeholder="联系电话" />
+            </div>
+            <div class="field">
+              <label>邮箱</label>
+              <input id="email" type="email" placeholder="邮箱" />
+            </div>
+            <div class="field">
+              <label>微信</label>
+              <input id="wechat" placeholder="微信号" />
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 16px">
+            <label>证件</label>
+            <div style="flex: 1">
+              <input type="file" id="idFile" accept=".pdf,.png,.jpg,.jpeg" style="font-size: 13px" />
+              <div class="hint" id="idFileHint">营业执照 / 身份证等，用于清关建档。图片会自动压缩，PDF ≤18MB</div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 22px">
+            <button class="btn orange" id="btnSave">✔ 确认</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    requireLogin();
+    renderShell("profile", "公司资料");
+
+    let idFileKey = "", idFileName = "";
+    let existingIdFile = "";
+
+    // 载入现有资料
+    (async () => {
+      try {
+        const { profile: p } = await api("/api/profile");
+        document.getElementById("company").value = p.company || "";
+        document.getElementById("shortName").value = p.shortName || "";
+        document.getElementById("code").value = p.code || "";
+        document.getElementById("contact").value = p.contact || "";
+        document.getElementById("phone").value = p.phone || "";
+        document.getElementById("email").value = p.email || "";
+        document.getElementById("wechat").value = p.wechat || "";
+        idFileKey = p.idFileKey || "";
+        idFileName = p.idFileName || "";
+        if (idFileKey) {
+          existingIdFile = idFileKey;
+          document.getElementById("idFileHint").innerHTML =
+            `已上传：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>（重新选择文件可替换）`;
+        }
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    })();
+
+    document.getElementById("btnSave").addEventListener("click", async () => {
+      if (!document.getElementById("company").value.trim()) return toast("请填写公司名称", "err");
+      if (!document.getElementById("contact").value.trim()) return toast("请填写联系人", "err");
+      if (!document.getElementById("phone").value.trim()) return toast("请填写联系电话", "err");
+      const btn = document.getElementById("btnSave");
+      btn.disabled = true;
+      try {
+        const f = document.getElementById("idFile").files[0];
+        if (f) {
+          const r = await uploadOne(f, (msg) => {
+            btn.textContent = msg;
+          });
+          idFileKey = r.key;
+          idFileName = r.name;
+        }
+        await api("/api/profile", {
+          method: "PUT",
+          body: {
+            company: document.getElementById("company").value,
+            shortName: document.getElementById("shortName").value,
+            contact: document.getElementById("contact").value,
+            phone: document.getElementById("phone").value,
+            email: document.getElementById("email").value,
+            wechat: document.getElementById("wechat").value,
+            idFileKey, idFileName,
+          },
+        });
+        toast("保存成功", "ok");
+        if (idFileKey) {
+          document.getElementById("idFileHint").innerHTML =
+            `已上传：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>`;
+        }
+      } catch (e) {
+        toast(e.message, "err");
+      }
+      btn.disabled = false;
+      btn.textContent = "✔ 确认";
+    });
+  </script>
+</body>
+</html>

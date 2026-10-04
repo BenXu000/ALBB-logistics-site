@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>货件物流查询 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <div class="topbar" id="topbar"></div>
+      <div class="content">
+        <div class="card">
+          <h3>运踪查询</h3>
+          <div class="filters" style="margin-bottom: 0">
+            <input id="trackNo" placeholder="输入物流单号 / 入仓号，例如 ALBG171338" style="flex: 1; min-width: 240px" />
+            <button class="btn" id="btnTrack">🔍 搜索</button>
+            <button class="btn ghost" id="btnReset">重置</button>
+          </div>
+          <div class="hint" style="margin-top: 8px">
+            支持三站单号自动识别：立信诺（ALBG…）/ 国际专线 / 海湾物流。也可先在下方列表点「查运踪」带出单号。
+          </div>
+        </div>
+
+        <div class="card" id="result" style="display: none"></div>
+
+        <div class="card">
+          <h3>我的在途订单</h3>
+          <div class="table-wrap">
+            <table class="grid">
+              <thead>
+                <tr><th>订单号</th><th>唛头</th><th>频道</th><th>最新动态</th><th>物流单号</th><th>操作</th></tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    renderShell("tracking", "货件物流查询");
+
+    const resultBox = document.getElementById("result");
+
+    async function doTrack(no) {
+      no = (no || document.getElementById("trackNo").value).trim();
+      if (!no) return toast("请输入单号", "err");
+      resultBox.style.display = "block";
+      resultBox.innerHTML = '<div style="text-align:center;color:#6b7280;padding:24px">查询中…</div>';
+      try {
+        const resp = await fetch(`${CFG.TRACK_API}/?source=auto&trackingNo=${encodeURIComponent(no)}`);
+        const data = await resp.json();
+        const tracks = data.tracks || [];
+        resultBox.innerHTML = `
+          <h3>查询结果 · ${esc(data.trackingNo || no)}
+            ${data.source ? `<span class="badge">${esc(data.source)}</span>` : ""}
+            ${data.destination ? `<span style="font-size:12.5px;color:#6b7280">目的地：${esc(data.destination)}</span>` : ""}
+          </h3>
+          ${data.currentActivity ? `<p style="margin:8px 0 4px;font-weight:600;color:#2e7d32">${esc(data.currentActivity)}</p>` : ""}
+          ${
+            tracks.length
+              ? `<ul class="timeline" style="margin-top:12px">${tracks
+                  .map(
+                    (t) =>
+                      `<li><div class="t-time">${esc(t.time || "")}</div><div class="t-status">${esc(t.status || "")}${
+                        t.statusEn && t.statusEn !== t.status ? ` <span style="color:#9ca3af;font-size:12px">${esc(t.statusEn)}</span>` : ""
+                      }</div></li>`
+                  )
+                  .join("")}</ul>`
+              : '<div class="empty-tip">未查询到轨迹，请确认单号是否正确（刚发货的单号可能需要 1-2 天上网）</div>'
+          }`;
+      } catch (e) {
+        resultBox.innerHTML = `<div class="empty-tip">查询失败：${esc(e.message)}。请稍后重试或联系 ALBB 客服。</div>`;
+      }
+    }
+
+    document.getElementById("btnTrack").addEventListener("click", () => doTrack());
+    document.getElementById("btnReset").addEventListener("click", () => {
+      document.getElementById("trackNo").value = "";
+      resultBox.style.display = "none";
+    });
+    document.getElementById("trackNo").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doTrack();
+    });
+
+    // 我的在途订单（未签收的排前面）
+    (async () => {
+      try {
+        const data = await api("/api/orders");
+        const orders = (data.orders || [])
+          .filter((o) => !["派送完成", "客户已接收"].includes(o.status))
+          .slice(0, 50);
+        document.getElementById("ordersBody").innerHTML = orders.length
+          ? orders
+              .map(
+                (o) => `<tr>
+                  <td><b style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</b></td>
+                  <td>${esc(o.markingNo || "-")}</td>
+                  <td>${esc(channelName(o.channel))}</td>
+                  <td><span class="status-pill s-${esc(o.status)}">${esc(o.status)}</span></td>
+                  <td>${esc(o.trackingNo || "待录入")}</td>
+                  <td>${
+                    o.trackingNo
+                      ? `<a href="javascript:void(0)" style="color:#e09612" onclick="doTrack('${esc(o.trackingNo)}');window.scrollTo(0,0)">🔍 查运踪</a>`
+                      : "-"
+                  }</td>
+                </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="6" style="text-align:center;color:#6b7280;padding:24px">暂无在途订单</td></tr>';
+      } catch (e) {
+        /* 静默：列表加载失败不阻塞查询 */
+      }
+    })();
+
+    // URL 带单号直接查询：tracking.html?no=XXX
+    const q = new URLSearchParams(location.search).get("no");
+    if (q) {
+      document.getElementById("trackNo").value = q;
+      doTrack(q);
+    }
+  </script>
+</body>
+</html>

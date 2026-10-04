@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 · ALBB 客户下单系统</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="brand">ALBB LOGISTICS</div>
+        <div class="sub">深圳阿联比伯国际物流</div>
+      </div>
+      <h1>客户下单系统 · 登录</h1>
+      <form id="loginForm">
+        <div class="field" style="margin-bottom: 14px">
+          <label style="width: 74px">客户代码</label>
+          <input id="code" placeholder="例如：ALBG0001" autocomplete="username" required />
+        </div>
+        <div class="field" style="margin-bottom: 20px">
+          <label style="width: 74px">密码</label>
+          <input id="password" type="password" placeholder="请输入密码" autocomplete="current-password" required />
+        </div>
+        <button class="btn" type="submit" id="btnLogin" style="width: 100%; justify-content: center; padding: 11px">
+          登 录
+        </button>
+      </form>
+      <div class="login-foot">
+        还没有账号？请联系 ALBB 客服开通（微信/电话）<br />
+        <a href="admin.html">ALBB 内部管理入口 →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    // 已登录直接进系统
+    if (localStorage.getItem("albb_order_token")) location.href = "index.html";
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btnLogin");
+      btn.disabled = true;
+      btn.textContent = "登录中…";
+      try {
+        const resp = await fetch(window.ALBB_CONFIG.API_BASE + "/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code: document.getElementById("code").value.trim(),
+            password: document.getElementById("password").value,
+          }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.error || "登录失败");
+        localStorage.setItem("albb_order_token", data.token);
+        localStorage.setItem("albb_order_user", JSON.stringify(data.user));
+        location.href = "index.html";
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.textContent = "登 录";
+      }
+    });
+  </script>
+</body>
+</html>
