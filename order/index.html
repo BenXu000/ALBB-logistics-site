@@ -16,7 +16,7 @@
           <h3>订单信息</h3>
           <div class="form-grid">
             <div class="field">
-              <label class="req">业务频道</label>
+              <label class="req">发货渠道</label>
               <select id="channel">
                 <option value="saudi-air">沙特空运</option>
                 <option value="saudi-sea">沙特海运</option>
@@ -25,22 +25,23 @@
               </select>
             </div>
             <div class="field">
-              <label>箱数/件数</label>
+              <label class="req">总箱数/总件数</label>
               <input id="pieces" type="number" min="1" placeholder="例如：5" />
             </div>
             <div class="field">
               <label class="req">交货仓库</label>
               <select id="warehouse">
                 <option value="">请选择</option>
-                <option>义乌仓</option>
-                <option>广州仓</option>
-                <option>深圳仓</option>
+                <option>东莞仓库</option>
+                <option>佛山仓库</option>
+                <option>义乌仓库</option>
+                <option>广州仓库</option>
               </select>
             </div>
             <div class="field">
               <label class="req">货物性质</label>
               <select id="goodsType">
-                <option value="">请选择或填写方式</option>
+                <option value="">请选择</option>
                 <option>普货</option>
                 <option>普货带电</option>
                 <option>敏感货（含牌/含磁/膏体等）</option>
@@ -54,19 +55,15 @@
               </select>
             </div>
             <div class="field">
-              <label>备注</label>
-              <input id="remark" placeholder="货物备注、特殊要求等" />
-            </div>
-            <div class="field">
               <label class="req">是否报关</label>
               <select id="customs">
                 <option value="否">不报关（双清包税）</option>
                 <option value="是">需要报关退税</option>
               </select>
             </div>
-            <div class="field">
-              <label>包裹</label>
-              <input id="parcelNote" placeholder="请提供箱唛或包裹信息（选填）" />
+            <div class="field" style="grid-column: 1 / -1">
+              <label>备注（选填）</label>
+              <input id="remark" placeholder="货物备注、特殊要求等" />
             </div>
           </div>
         </div>
@@ -78,9 +75,9 @@
               <label class="req">派送方式</label>
               <select id="deliveryMode">
                 <option value="">请选择</option>
-                <option>快递派送</option>
-                <option>卡车派送</option>
-                <option>沙特自提</option>
+                <option>亚马逊</option>
+                <option>Noon预约送仓</option>
+                <option>非平台仓</option>
               </select>
             </div>
             <div class="field">
@@ -92,32 +89,35 @@
               </datalist>
             </div>
             <div class="field">
-              <label>派送类型</label>
+              <label class="req">派送类型</label>
               <select id="deliveryType">
                 <option value="">请选择</option>
-                <option>派送到门</option>
-                <option>派送到仓</option>
-                <option>机场/港口自提</option>
+                <option>直接派送</option>
+                <option>等通知派送</option>
               </select>
             </div>
+            <div class="field" id="fieldFbaWh" style="display:none">
+              <label class="req">Amazon W/H（FBA仓库号）</label>
+              <input id="amazonWh" placeholder="例如：LAX9" />
+            </div>
+            <div class="field" id="fieldFbaRef" style="display:none">
+              <label class="req">Amazon Reference (PO-Nr)（亚马逊参考号ID）*PO LIST</label>
+              <input id="amazonRef" placeholder="亚马逊参考号 ID" />
+            </div>
+            <div class="field" id="fieldDeliveryAddr" style="display:none; grid-column: 1 / -1">
+              <label class="req">派送地址</label>
+              <textarea id="deliveryAddress" rows="2" placeholder="详细地址 + 联系人 + 联系方式"></textarea>
+            </div>
+            <div class="field" id="fieldShortAddr" style="display:none">
+              <label class="req">短地址</label>
+              <input id="shortAddress" placeholder="短地址" />
+            </div>
           </div>
-        </div>
-
-        <div class="card">
-          <h3>发货资料</h3>
-          <div class="form-grid">
-            <div class="field">
-              <label class="req">发货人</label>
-              <input id="senderName" placeholder="发货人姓名" />
-            </div>
-            <div class="field">
-              <label class="req">发货人电话</label>
-              <input id="senderPhone" placeholder="发货人联系电话" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1">
-              <label>发货地址</label>
-              <input id="senderAddress" placeholder="省市区 + 详细地址（选填）" />
-            </div>
+          <!-- 亚马逊：FBA 箱唛行 -->
+          <div id="fbaSection" style="display:none; margin-top: 14px">
+            <p style="font-size: 13px; font-weight: 600; color: #1e4620; margin-bottom: 8px">FBA 箱唛信息（每行一个 FBA，*PRO）</p>
+            <div id="fbaRows"></div>
+            <button type="button" class="btn ghost" id="btnAddFba" style="margin-top: 8px">＋ 增加一行</button>
           </div>
         </div>
 
@@ -139,11 +139,8 @@
             <button class="btn orange" id="btnSubmit">✔ 确 认</button>
             <button class="btn ghost" id="btnReset">⟳ 重置表单</button>
           </div>
-          <p style="margin-top: 18px; font-size: 12.5px; color: #6b7280; line-height: 1.9">
-            请注意：<br />
-            义乌仓和广州仓收货时间一致：周一至周六 10:00-19:00，周日不收货；<br />
-            午间休息：12:00-13:30 &nbsp;/&nbsp; 傍晚：17:30-19:00 之外正常收货；<br />
-            感谢你的理解与支持。下单后请将货物寄到对应仓库，到仓后 ALBB 会在 24 小时内入库并录入计费重。
+          <p style="margin-top: 14px; font-size: 12.5px; color: #6b7280; text-align: center">
+            除「备注」外均为必填项。下单后请将货物寄到对应仓库，到仓后 ALBB 会在 24 小时内入库并录入计费重。
           </p>
         </div>
       </div>
@@ -162,8 +159,51 @@
     function syncMode() {
       const v = channelSel.value;
       modeSel.innerHTML = `<option selected>${v.endsWith("-air") ? "空运" : "海运"}</option>`;
+      syncDeliveryUI(); // 沙特渠道才显示"短地址"
     }
     channelSel.addEventListener("change", syncMode);
+
+    // ---------- 派送方式联动 ----------
+    const modeSelD = document.getElementById("deliveryMode");
+    const fbaSection = document.getElementById("fbaSection");
+    const fieldFbaRef = document.getElementById("fieldFbaRef");
+    const fieldFbaWh = document.getElementById("fieldFbaWh");
+    const fieldAddr = document.getElementById("fieldDeliveryAddr");
+    const fieldShort = document.getElementById("fieldShortAddr");
+
+    function syncDeliveryUI() {
+      const m = modeSelD.value;
+      const isAmazon = m === "亚马逊";
+      const isNonPlatform = m === "非平台仓";
+      const isSaudi = channelSel.value.startsWith("saudi");
+      fbaSection.style.display = isAmazon ? "block" : "none";
+      fieldFbaRef.style.display = isAmazon ? "" : "none";
+      fieldFbaWh.style.display = isAmazon ? "" : "none";
+      fieldAddr.style.display = isNonPlatform ? "" : "none";
+      fieldShort.style.display = isNonPlatform && isSaudi ? "" : "none";
+    }
+    modeSelD.addEventListener("change", syncDeliveryUI);
+
+    // ---------- FBA 行（FBA# + 上传箱唛 + 箱数，可增删） ----------
+    const fbaRows = document.getElementById("fbaRows");
+    function addFbaRow() {
+      const div = document.createElement("div");
+      div.className = "fba-row";
+      div.style.cssText =
+        "display:grid;grid-template-columns:1.4fr 1.6fr 0.6fr 38px;gap:8px;align-items:center;margin-bottom:8px";
+      div.innerHTML = `
+        <input class="fba-no" placeholder="FBA Number（FBA箱唛）*PRO" />
+        <input class="fba-file" type="file" accept=".pdf,.png,.jpg,.jpeg" title="上传亚马逊箱唛" />
+        <input class="fba-boxes" type="number" min="1" placeholder="箱数" />
+        <button type="button" class="btn ghost fba-del" style="padding:4px 8px;color:#dc2626">－</button>`;
+      div.querySelector(".fba-del").addEventListener("click", () => {
+        if (fbaRows.children.length > 1) div.remove();
+        else toast("至少保留一行", "err");
+      });
+      fbaRows.appendChild(div);
+    }
+    document.getElementById("btnAddFba").addEventListener("click", addFbaRow);
+    addFbaRow();
 
     // URL 预选频道：index.html?channel=saudi-sea
     const q = new URLSearchParams(location.search).get("channel");
@@ -188,26 +228,69 @@
 
     document.getElementById("btnReset").addEventListener("click", () => location.reload());
 
-    document.getElementById("btnSubmit").addEventListener("click", async () => {
-      const need = [
+    // ---------- 必填校验：除「备注」外全部必填 ----------
+    function validate() {
+      const must = [
+        ["channel", "请选择发货渠道"],
+        ["pieces", "请填写总箱数/总件数"],
         ["warehouse", "请选择交货仓库"],
         ["goodsType", "请选择货物性质"],
+        ["customs", "请选择是否报关"],
         ["deliveryMode", "请选择派送方式"],
         ["deliveryCity", "请填写派送城市"],
-        ["senderName", "请填写发货人"],
-        ["senderPhone", "请填写发货人电话"],
+        ["deliveryType", "请选择派送类型"],
       ];
-      for (const [id, msg] of need) {
-        if (!document.getElementById(id).value.trim()) {
+      for (const [id, msg] of must) {
+        const el = document.getElementById(id);
+        if (!el || !el.value.trim()) {
           toast(msg, "err");
-          document.getElementById(id).focus();
-          return;
+          el && el.focus();
+          return false;
         }
       }
       if (!Number(document.getElementById("pieces").value)) {
-        toast("请填写箱数/件数", "err");
-        return;
+        toast("总箱数/总件数请填写大于 0 的数字", "err");
+        return false;
       }
+      const m = modeSelD.value;
+      if (m === "亚马逊") {
+        if (!document.getElementById("amazonRef").value.trim()) {
+          toast("请填写 Amazon Reference (PO-Nr)", "err");
+          return false;
+        }
+        if (!document.getElementById("amazonWh").value.trim()) {
+          toast("请填写 Amazon W/H（FBA仓库号）", "err");
+          return false;
+        }
+        const rows = Array.from(fbaRows.querySelectorAll(".fba-row"));
+        for (let i = 0; i < rows.length; i++) {
+          const no = rows[i].querySelector(".fba-no").value.trim();
+          const boxes = Number(rows[i].querySelector(".fba-boxes").value);
+          const file = rows[i].querySelector(".fba-file").files[0];
+          if (!no) { toast(`第 ${i + 1} 行：请填写 FBA Number`, "err"); return false; }
+          if (!boxes || boxes < 1) { toast(`第 ${i + 1} 行：请填写箱数`, "err"); return false; }
+          if (!file) { toast(`第 ${i + 1} 行：请上传亚马逊箱唛文件`, "err"); return false; }
+        }
+      }
+      if (m === "非平台仓") {
+        if (!document.getElementById("deliveryAddress").value.trim()) {
+          toast("请填写派送地址（详细地址+联系人+联系方式）", "err");
+          return false;
+        }
+        if (fieldShort.style.display !== "none" && !document.getElementById("shortAddress").value.trim()) {
+          toast("请填写短地址", "err");
+          return false;
+        }
+      }
+      if (!packingInput.files || !packingInput.files.length) {
+        toast("请上传订仓表（Excel）", "err");
+        return false;
+      }
+      return true;
+    }
+
+    document.getElementById("btnSubmit").addEventListener("click", async () => {
+      if (!validate()) return;
       const btn = document.getElementById("btnSubmit");
       btn.disabled = true;
       btn.textContent = "提交中…";
@@ -219,6 +302,22 @@
             btn.textContent = msg;
           });
         }
+        // 亚马逊：上传每行箱唛文件
+        let fbaRowsData = [];
+        if (modeSelD.value === "亚马逊") {
+          const rows = Array.from(fbaRows.querySelectorAll(".fba-row"));
+          for (let i = 0; i < rows.length; i++) {
+            const f = rows[i].querySelector(".fba-file").files[0];
+            btn.textContent = `上传箱唛（${i + 1}/${rows.length}）…`;
+            const up = await uploadOne(f);
+            fbaRowsData.push({
+              fbaNo: rows[i].querySelector(".fba-no").value.trim(),
+              boxes: Number(rows[i].querySelector(".fba-boxes").value),
+              fileKey: up.key,
+              fileName: up.name,
+            });
+          }
+        }
         const data = await api("/api/orders", {
           method: "POST",
           body: {
@@ -227,14 +326,15 @@
             customs: document.getElementById("customs").value,
             pieces: Number(document.getElementById("pieces").value),
             goodsType: document.getElementById("goodsType").value,
-            parcelNote: document.getElementById("parcelNote").value,
             remark: document.getElementById("remark").value,
-            deliveryMode: document.getElementById("deliveryMode").value,
+            deliveryMode: modeSelD.value,
             deliveryCity: document.getElementById("deliveryCity").value,
             deliveryType: document.getElementById("deliveryType").value,
-            senderName: document.getElementById("senderName").value,
-            senderPhone: document.getElementById("senderPhone").value,
-            senderAddress: document.getElementById("senderAddress").value,
+            deliveryAddress: document.getElementById("deliveryAddress").value,
+            shortAddress: document.getElementById("shortAddress").value,
+            amazonRef: document.getElementById("amazonRef").value,
+            amazonWh: document.getElementById("amazonWh").value,
+            fbaRows: fbaRowsData,
             attachments,
           },
         });

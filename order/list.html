@@ -169,6 +169,22 @@
             ${row("派送方式", o.deliveryMode)}
             ${row("派送城市", o.deliveryCity)}
             ${row("派送类型", o.deliveryType)}
+            ${row("派送地址", o.deliveryAddress)}
+            ${row("短地址", o.shortAddress)}
+            ${row("Amazon Reference (PO-Nr)", o.amazonRef)}
+            ${row("Amazon W/H（FBA仓库号）", o.amazonWh)}
+            ${o.deliveryMode === "亚马逊" && Array.isArray(o.fbaRows) && o.fbaRows.length
+              ? `<div class="field" style="margin-bottom:10px"><label style="width:96px">FBA 箱唛</label><div style="flex:1">${o.fbaRows
+                  .map(
+                    (r) =>
+                      `${esc(r.fbaNo)}（${esc(r.boxes)} 箱）${
+                        r.fileKey
+                          ? ` · <a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
+                          : ""
+                      }`
+                  )
+                  .join("<br />")}</div></div>`
+              : ""}
             ${row("预计出仓", o.etaOut)}
             ${row("签收时间", o.signedTime)}
             ${row("签收备注", o.signedNote)}

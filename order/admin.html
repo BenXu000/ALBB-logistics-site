@@ -270,10 +270,29 @@
           </div>
           <div class="field" style="margin-bottom:12px"><label style="width:92px">备注</label><input id="oe_remark" value="${esc(o.remark || "")}" /></div>
           <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
-            客户发货资料：${esc(o.senderName || "-")} / ${esc(o.senderPhone || "-")} / ${esc(o.senderAddress || "-")} ·
-            派送：${esc(o.deliveryMode || "-")} ${esc(o.deliveryCity || "-")} ${esc(o.deliveryType || "-")} ·
-            货物性质：${esc(o.goodsType || "-")} · 报关：${esc(o.customs || "-")}
+            发货渠道：${esc(channelName(o.channel))} · 仓库：${esc(o.warehouse || "-")} ·
+            货物性质：${esc(o.goodsType || "-")} · 报关：${esc(o.customs || "-")} ·
+            总箱数/总件数：${esc(o.pieces || "-")}
           </p>
+          <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
+            派送：${esc(o.deliveryMode || "-")} ${esc(o.deliveryCity || "-")} ${esc(o.deliveryType || "-")} ·
+            ${o.deliveryAddress ? `派送地址：${esc(o.deliveryAddress)} · ` : ""}
+            ${o.shortAddress ? `短地址：${esc(o.shortAddress)} · ` : ""}
+            ${o.amazonRef ? `PO-Nr：${esc(o.amazonRef)} · ` : ""}
+            ${o.amazonWh ? `FBA仓库号：${esc(o.amazonWh)} · ` : ""}
+          </p>
+          ${o.deliveryMode === "亚马逊" && Array.isArray(o.fbaRows) && o.fbaRows.length
+            ? `<p style="font-size:12px;color:#6b7280;margin-bottom:10px">FBA 箱唛：${o.fbaRows
+                .map(
+                  (r) =>
+                    `${esc(r.fbaNo)}（${esc(r.boxes)} 箱）${
+                      r.fileKey
+                        ? ` · <a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
+                        : ""
+                    }`
+                )
+                .join("；")}</p>`
+            : ""}
           <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
             附件（${attList.length}）：
             ${attList.length
