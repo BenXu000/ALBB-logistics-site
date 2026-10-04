@@ -130,6 +130,7 @@ function printLabels(order) {
       .mic { font-size: 15pt; font-weight: 600; text-align: center; letter-spacing: 1.5mm; }
       .print-tip { padding: 20px; font: 14px "Microsoft YaHei"; color: #555; }
       @media screen { .lbl { border: 1px dashed #999; margin: 10px auto; } }
+      @media print { .print-tip { display: none; } }
     </style></head><body>
     <div class="print-tip">共 ${n} 张（规格 10×10cm，A4 纸打印时每页 2 张可裁切）。浏览器打印对话框中请选择"无边距/实际大小"。</div>
     ${labels.join("")}
