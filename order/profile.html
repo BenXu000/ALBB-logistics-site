@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>公司资料 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=1005" />
 </head>
 <body>
   <div class="layout">
@@ -46,6 +46,14 @@
               <label>微信</label>
               <input id="wechat" readonly style="background:#f4f6f9" />
             </div>
+            <div class="field">
+              <label>业务员</label>
+              <input id="salesperson" readonly style="background:#f4f6f9" />
+            </div>
+            <div class="field" style="grid-column: 1 / -1">
+              <label>客户地址</label>
+              <input id="address" readonly style="background:#f4f6f9" />
+            </div>
           </div>
 
           <div class="field" style="margin-top: 16px">
@@ -59,8 +67,8 @@
     </div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/common.js"></script>
+  <script src="js/config.js?v=1005"></script>
+  <script src="js/common.js?v=1005"></script>
   <script>
     requireLogin();
     renderShell("profile", "公司资料");
@@ -79,12 +87,14 @@
         document.getElementById("phone").value = p.phone || "";
         document.getElementById("email").value = p.email || "";
         document.getElementById("wechat").value = p.wechat || "";
+        document.getElementById("salesperson").value = p.salesperson || "";
+        document.getElementById("address").value = p.address || "";
         idFileKey = p.idFileKey || "";
         idFileName = p.idFileName || "";
         if (idFileKey) {
           existingIdFile = idFileKey;
           document.getElementById("idFileHint").innerHTML =
-            `已上传：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>`;
+            `已上传：<a style="color:#2e7d32" href="${fileUrl(idFileKey)}" target="_blank">查看 ${esc(idFileName)}</a>`;
         }
       } catch (e) {
         toast(e.message, "err");

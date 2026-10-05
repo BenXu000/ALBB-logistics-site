@@ -14,9 +14,9 @@
       <div class="content">
         <div class="tabs" id="tabs"></div>
         <div class="filters">
-          <input type="date" id="fFrom" title="入库日期从" />
+          <input type="date" id="fFrom" title="下单日期从" />
           <span style="color: #9ca3af">to</span>
-          <input type="date" id="fTo" title="入库日期至" />
+          <input type="date" id="fTo" title="下单日期至" />
           <select id="fStatus">
             <option value="">订单状态</option>
             <option>待入仓</option><option>已入库</option><option>已出仓</option>
@@ -33,7 +33,7 @@
           <table class="grid" id="tbl">
             <thead>
               <tr>
-                <th>#</th><th>入库日期</th><th>订单号</th><th>唛头</th><th>仓库类型</th>
+                <th>#</th><th>订单号</th><th>唛头</th><th>仓库类型</th>
                 <th>箱数</th><th>重量(KG)</th><th>计费重</th><th>计费体积</th>
                 <th>单价</th><th>最新动态</th><th>时间</th><th>预计出仓</th>
                 <th>签收时间</th><th>备注</th><th>物流单号</th><th>操作</th>
@@ -114,7 +114,7 @@
 
     async function loadOrders() {
       const tbody = document.getElementById("tbody");
-      tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
       const qs = new URLSearchParams();
       if (curChannel) qs.set("channel", curChannel);
       try {
@@ -142,7 +142,6 @@
           .map(
             (o, i) => `<tr${hl === o.id ? ' style="background:#fff7e0"' : ""}>
               <td>${i + 1}</td>
-              <td>${esc(o.createdAt)}</td>
               <td><b style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</b></td>
               <td>${esc(o.markingNo || "-")}</td>
               <td>${esc(o.warehouse)}</td>
@@ -208,7 +207,6 @@
           <div class="form-grid">
             ${row("唛头", o.markingNo || "-")}
             ${rowHtml("状态", statusPill(o.status))}
-            ${rowHtml("入库日期", `<span id="dInbound">${esc(o.createdAt)}</span>`)}
             ${row("交货仓库", o.warehouse)}
             ${row("箱数/件数", o.pieces)}
             ${row("重量(KG)", o.weightKg)}
@@ -260,17 +258,16 @@
             <button class="btn" onclick="document.getElementById('detailMask').style.display='none'">关 闭</button>
           </div>`;
         document.getElementById("detailMask").style.display = "flex";
-        // —— 有物流单号时，实时抓取实际运踪：替换物流动态 + 校正入库日期 ——
+        // —— 有物流单号时，实时抓取实际运踪替换物流动态 ——
         if (o.trackingNo) syncDetailTracking(o.trackingNo);
       } catch (e) {
         toast(e.message, "err");
       }
     }
 
-    /** 打开详情时实时抓真实运踪：物流动态显示实际轨迹，入库日期按运踪中的入库/到仓事件同步 */
+    /** 打开详情时实时抓真实运踪：物流动态直接显示实际轨迹 */
     async function syncDetailTracking(trackingNo) {
       const box = document.getElementById("dTracks");
-      const inboundEl = document.getElementById("dInbound");
       if (!box) return;
       try {
         const resp = await fetch(`${CFG.TRACK_API}/?source=auto&trackingNo=${encodeURIComponent(trackingNo)}`);
@@ -286,18 +283,6 @@
                   }</div></li>`
               )
               .join("");
-        }
-        // 入库日期：在运踪里找 入库/到仓/收货 类事件的时间，找到则替换显示
-        if (inboundEl) {
-          const inTrack = tracks.find((t) =>
-            /入库|到仓|进仓|收货|已签收入仓|warehouse\s*(receiving|received|inbound)|arrived\s*(at|in)\s*(the\s*)?warehouse|received\s*goods/i.test(
-              `${t.status || ""} ${t.statusEn || ""}`
-            )
-          );
-          if (inTrack && inTrack.time) {
-            const d = String(inTrack.time).trim();
-            inboundEl.textContent = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10) : d;
-          }
         }
       } catch (e) {
         /* 抓取失败保留原物流动态，不打断弹窗 */

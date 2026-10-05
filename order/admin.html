@@ -66,7 +66,7 @@
             <table class="grid">
               <thead>
                 <tr>
-                  <th>#</th><th>入库日期</th><th>客户</th><th>订单号</th><th>唛头</th><th>频道</th>
+                  <th>#</th><th>客户</th><th>订单号</th><th>唛头</th><th>频道</th>
                   <th>仓库</th><th>箱数</th><th>重量(KG)</th><th>计费重</th><th>单价</th>
                   <th>最新动态</th><th>签收时间</th><th>物流单号</th><th>操作</th>
                 </tr>
@@ -86,7 +86,7 @@
               <thead>
                 <tr>
                   <th>#</th><th>客户代码</th><th>公司名称</th><th>联系人</th><th>电话</th>
-                  <th>邮箱</th><th>微信</th><th>开通日期</th><th>状态</th><th>操作</th>
+                  <th>邮箱</th><th>微信</th><th>业务员</th><th>客户地址</th><th>开通日期</th><th>状态</th><th>操作</th>
                 </tr>
               </thead>
               <tbody id="aUsersBody"></tbody>
@@ -106,6 +106,7 @@
     <div class="modal" id="userBox" style="width: 560px"></div>
   </div>
 
+  <script src="js/region.js?v=1005"></script>
   <script src="js/config.js?v=1005"></script>
   <script src="js/common.js?v=1005"></script>
   <script>
@@ -187,7 +188,7 @@
 
     async function loadAdminOrders() {
       const body = document.getElementById("aOrdersBody");
-      body.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      body.innerHTML = '<tr><td colspan="14" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
       try {
         const qs = new URLSearchParams();
         if (curTab) qs.set("channel", curTab);
@@ -211,7 +212,6 @@
               .map(
                 (o, i) => `<tr>
                   <td>${i + 1}</td>
-                  <td>${esc(o.createdAt)}</td>
                   <td><b>${esc(o.code)}</b></td>
                   <td><b style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</b></td>
                   <td>${esc(o.markingNo || "-")}</td>
@@ -231,7 +231,7 @@
                 </tr>`
               )
               .join("")
-          : '<tr><td colspan="15" style="text-align:center;color:#6b7280;padding:30px">暂无订单</td></tr>';
+          : '<tr><td colspan="14" style="text-align:center;color:#6b7280;padding:30px">暂无订单</td></tr>';
       } catch (e) {
         body.innerHTML = "";
         toast(e.message, "err");
@@ -401,7 +401,7 @@
     // ---------- 客户账号 ----------
     async function loadUsers() {
       const body = document.getElementById("aUsersBody");
-      body.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      body.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
       try {
         const { users } = await api("/api/users");
         body.innerHTML = users.length
@@ -415,6 +415,8 @@
                   <td>${esc(u.phone || "-")}</td>
                   <td>${esc(u.email || "-")}</td>
                   <td>${esc(u.wechat || "-")}</td>
+                  <td>${esc(u.salesperson || "-")}</td>
+                  <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${esc(u.address || "")}">${esc(u.address || "-")}</td>
                   <td>${esc(u.createdAt || "-")}</td>
                   <td>${u.disabled ? '<span class="badge gray">已停用</span>' : '<span class="badge green">正常</span>'}</td>
                   <td>
@@ -427,11 +429,51 @@
                 </tr>`
               )
               .join("")
-          : '<tr><td colspan="10" style="text-align:center;color:#6b7280;padding:30px">还没有客户账号，点击上方「＋ 开通客户账号」</td></tr>';
+          : '<tr><td colspan="12" style="text-align:center;color:#6b7280;padding:30px">还没有客户账号，点击上方「＋ 开通客户账号」</td></tr>';
       } catch (e) {
         body.innerHTML = "";
         toast(e.message, "err");
       }
+    }
+
+    // ---------- 省市区联动选择（快速录入客户地址，参考顺丰下单方式） ----------
+    const REGION = window.REGION_DATA || {};
+    const PROVINCES = window.PROVINCES || Object.keys(REGION);
+
+    /** 在容器内生成 省/市/区 三级联动下拉，返回 {get(), set()} */
+    function makeRegionSelects(containerId, preset = {}) {
+      const box = document.getElementById(containerId);
+      if (!box) return { get: () => ({}), set: () => {} };
+      box.innerHTML = `
+        <select id="${containerId}_prov" style="flex:1"><option value="">省 / 直辖市</option>${PROVINCES.map(
+        (p) => `<option${preset.province === p ? " selected" : ""}>${esc(p)}</option>`
+      ).join("")}</select>
+        <select id="${containerId}_city" style="flex:1"><option value="">市</option></select>
+        <select id="${containerId}_dist" style="flex:1"><option value="">区 / 县</option></select>`;
+      const prov = document.getElementById(`${containerId}_prov`);
+      const city = document.getElementById(`${containerId}_city`);
+      const dist = document.getElementById(`${containerId}_dist`);
+      const fillCity = (keep) => {
+        const cities = Object.keys(REGION[prov.value] || {});
+        city.innerHTML = `<option value="">市</option>${cities.map((c) => `<option${keep === c ? " selected" : ""}>${esc(c)}</option>`).join("")}`;
+        fillDist();
+      };
+      const fillDist = (keep) => {
+        const areas = (REGION[prov.value] || {})[city.value] || [];
+        dist.innerHTML = `<option value="">区 / 县</option>${areas.map((a) => `<option${keep === a ? " selected" : ""}>${esc(a)}</option>`).join("")}`;
+      };
+      prov.addEventListener("change", () => fillCity());
+      city.addEventListener("change", () => fillDist());
+      if (preset.province) fillCity(preset.city);
+      if (preset.province && preset.district) dist.value = preset.district;
+      return {
+        get: () => ({ province: prov.value, city: city.value, district: dist.value }),
+        set: (p = {}) => {
+          prov.value = p.province || "";
+          fillCity(p.city);
+          dist.value = p.district || "";
+        },
+      };
     }
 
     function openUserModal() {
@@ -445,14 +487,24 @@
           <div class="field" style="margin-bottom:12px"><label style="width:80px">电话</label><input id="nu_phone" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">邮箱</label><input id="nu_email" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">微信</label><input id="nu_wechat" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">业务员</label><input id="nu_salesperson" placeholder="归属业务员姓名（用于业绩统计）" /></div>
+        </div>
+        <div class="field" style="margin-bottom:8px;align-items:flex-start">
+          <label style="width:80px;padding-top:8px">客户地址</label>
+          <div style="flex:1">
+            <div id="nu_region" style="display:flex;gap:8px"></div>
+            <input id="nu_addressDetail" placeholder="详细地址（街道、门牌号等）" style="margin-top:8px" />
+          </div>
         </div>
         <div class="modal-foot">
           <button class="btn ghost" onclick="document.getElementById('userMask').style.display='none'">取消</button>
           <button class="btn orange" id="nuSave">✔ 开通</button>
         </div>`;
       document.getElementById("userMask").style.display = "flex";
+      const nuRegion = makeRegionSelects("nu_region");
       document.getElementById("nuSave").addEventListener("click", async () => {
         try {
+          const rg = nuRegion.get();
           await api("/api/users", {
             method: "POST",
             body: {
@@ -463,6 +515,11 @@
               phone: document.getElementById("nu_phone").value,
               email: document.getElementById("nu_email").value,
               wechat: document.getElementById("nu_wechat").value,
+              salesperson: document.getElementById("nu_salesperson").value,
+              province: rg.province,
+              city: rg.city,
+              district: rg.district,
+              addressDetail: document.getElementById("nu_addressDetail").value,
             },
           });
           toast("账号已开通", "ok");
@@ -494,6 +551,14 @@
           <div class="field" style="margin-bottom:12px"><label style="width:80px">电话</label><input id="pe_phone" value="${esc(u.phone || "")}" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">邮箱</label><input id="pe_email" value="${esc(u.email || "")}" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">微信</label><input id="pe_wechat" value="${esc(u.wechat || "")}" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">业务员</label><input id="pe_salesperson" value="${esc(u.salesperson || "")}" placeholder="归属业务员姓名（用于业绩统计）" /></div>
+        </div>
+        <div class="field" style="margin-bottom:8px;align-items:flex-start">
+          <label style="width:80px;padding-top:8px">客户地址</label>
+          <div style="flex:1">
+            <div id="pe_region" style="display:flex;gap:8px"></div>
+            <input id="pe_addressDetail" value="${esc(u.addressDetail || "")}" placeholder="详细地址（街道、门牌号等）" style="margin-top:8px" />
+          </div>
         </div>
         <div class="field" style="margin-bottom:12px"><label style="width:80px">证件</label>
           <div style="flex:1">
@@ -506,10 +571,12 @@
           <button class="btn orange" id="peSave">✔ 保存</button>
         </div>`;
       document.getElementById("userMask").style.display = "flex";
+      const peRegion = makeRegionSelects("pe_region", { province: u.province, city: u.city, district: u.district });
       document.getElementById("peSave").addEventListener("click", async () => {
         const btn = document.getElementById("peSave");
         btn.disabled = true;
         try {
+          const rg = peRegion.get();
           const body = {
             company: document.getElementById("pe_company").value,
             shortName: document.getElementById("pe_shortName").value,
@@ -517,6 +584,11 @@
             phone: document.getElementById("pe_phone").value,
             email: document.getElementById("pe_email").value,
             wechat: document.getElementById("pe_wechat").value,
+            salesperson: document.getElementById("pe_salesperson").value,
+            province: rg.province,
+            city: rg.city,
+            district: rg.district,
+            addressDetail: document.getElementById("pe_addressDetail").value,
           };
           const f = document.getElementById("pe_idFile").files[0];
           if (f) {
