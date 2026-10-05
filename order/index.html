@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>新建订单 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=1006" />
 </head>
 <body>
   <div class="layout">
@@ -12,6 +12,18 @@
     <div class="main">
       <div class="topbar" id="topbar"></div>
       <div class="content">
+        <div class="card" id="proxyCard" style="display:none">
+          <h3>代客下单（管理员）</h3>
+          <div class="field">
+            <label class="req">客户代码</label>
+            <input id="proxyCode" list="custList" placeholder="输入客户代码，例如 ALBB20261004" style="text-transform: uppercase" />
+            <datalist id="custList"></datalist>
+          </div>
+          <div class="hint" style="margin-left: 98px">
+            订单将归属到该客户名下（客户登录后可看到这笔订单与唛头）。客户代码可直接输入或从下拉中选择。
+          </div>
+        </div>
+
         <div class="card">
           <h3>订单信息</h3>
           <div class="form-grid">
@@ -147,11 +159,26 @@
     </div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/common.js"></script>
+  <script src="js/config.js?v=1006"></script>
+  <script src="js/common.js?v=1006"></script>
   <script>
     const user = requireLogin();
-    renderShell("new", "新建订单");
+    // 管理员登录后即为「代客下单」模式：需先指定客户代码，订单归属该客户
+    const isAdmin = !!(user && user.role === "admin");
+    renderShell("new", isAdmin ? "代客下单（管理员）" : "新建订单");
+
+    let custCodes = []; // 管理员可用客户代码列表（用于代客下单校验）
+    if (isAdmin) {
+      document.getElementById("proxyCard").style.display = "block";
+      api("/api/users")
+        .then(({ users }) => {
+          custCodes = (users || []).map((u) => u.code);
+          document.getElementById("custList").innerHTML = (users || [])
+            .map((u) => `<option value="${esc(u.code)}">${esc(u.company || "")}${u.contact ? " · " + esc(u.contact) : ""}</option>`)
+            .join("");
+        })
+        .catch((e) => toast("客户列表加载失败：" + e.message, "err"));
+    }
 
     // 频道联动运输方式
     const channelSel = document.getElementById("channel");
@@ -230,6 +257,19 @@
 
     // ---------- 必填校验：除「备注」外全部必填 ----------
     function validate() {
+      if (isAdmin) {
+        const c = (document.getElementById("proxyCode").value || "").trim().toUpperCase();
+        if (!c) {
+          toast("请填写客户代码，订单将归属该客户", "err");
+          document.getElementById("proxyCode").focus();
+          return false;
+        }
+        if (custCodes.length && !custCodes.includes(c)) {
+          toast(`客户代码 ${c} 不存在，请核对后重新输入`, "err");
+          document.getElementById("proxyCode").focus();
+          return false;
+        }
+      }
       const must = [
         ["channel", "请选择发货渠道"],
         ["pieces", "请填写总件数"],
@@ -321,6 +361,8 @@
         const data = await api("/api/orders", {
           method: "POST",
           body: {
+            // 管理员代客下单：指定归属客户；客户端下单：走自己账号
+            code: isAdmin ? document.getElementById("proxyCode").value.trim().toUpperCase() : user.code,
             channel: channelSel.value,
             warehouse: document.getElementById("warehouse").value,
             customs: document.getElementById("customs").value,
@@ -346,7 +388,8 @@
           printLabels(data.order);
         }
         setTimeout(() => {
-          location.href = "list.html?channel=" + data.order.channel + "&highlight=" + data.order.id;
+          // 管理员代客下单完成后返回后台订单管理；客户下单后回到订单列表
+          location.href = isAdmin ? "admin.html" : "list.html?channel=" + data.order.channel + "&highlight=" + data.order.id;
         }, 1500);
       } catch (e) {
         toast(e.message, "err");

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>唛头 LABEL 样式预览 · ALBB</title>
+  <style>
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f4f7f4; padding: 24px; color: #1f2937; }
+    h2 { color: #2e7d32; }
+    p.tip { color: #6b7280; font-size: 13.5px; margin-bottom: 20px; }
+    .lbl {
+      width: 100mm; height: 100mm; padding: 7mm;
+      border: 0.6mm solid #000; background: #fff;
+      display: flex; flex-direction: column; justify-content: space-between;
+      display: inline-flex; margin: 0 14px 14px 0; vertical-align: top;
+    }
+    .row1 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
+    .row2 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
+    .boxno { font-size: 34pt; font-weight: 800; text-align: center; }
+    .mic { font-size: 15pt; font-weight: 600; text-align: center; letter-spacing: 1.5mm; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      h2, p.tip { display: none; }
+      .lbl { border: 0.6mm solid #000; margin: 0; page-break-after: always; }
+      @page { size: 100mm 100mm; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h2>外箱唛头 LABEL 样式（10×10cm，每箱一张）</h2>
+  <p class="tip">
+    正式系统在「订单列表 → 🖨 唛头」或订单详情里打印，箱号按订单箱数自动生成（示例订单 100 件，此处展示前 3 张）。<br />
+    打印时选「无边距 / 实际大小」。本页可直接 Ctrl+P 试打。
+  </p>
+  <div class="lbl">
+    <div class="row1">唛头：LQYT2610001</div>
+    <div class="row2">入仓号：CKA-42210</div>
+    <div class="boxno">1/100</div>
+    <div class="mic">Made in China</div>
+  </div>
+  <div class="lbl">
+    <div class="row1">唛头：LQYT2610001</div>
+    <div class="row2">入仓号：CKA-42210</div>
+    <div class="boxno">2/100</div>
+    <div class="mic">Made in China</div>
+  </div>
+  <div class="lbl">
+    <div class="row1">唛头：LQYT2610001</div>
+    <div class="row2">入仓号：CKA-42210</div>
+    <div class="boxno">3/100</div>
+    <div class="mic">Made in China</div>
+  </div>
+</body>
+</html>
