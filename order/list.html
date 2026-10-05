@@ -20,7 +20,9 @@
           <select id="fStatus">
             <option value="">订单状态</option>
             <option>待入仓</option><option>已入库</option><option>已出仓</option>
-            <option>派送中</option><option>派送完成</option><option>客户已接收</option>
+            <option>已发出</option><option>运输中</option><option>已到港</option>
+            <option>清关中</option><option>派送中</option><option>派送完成</option>
+            <option>签收</option><option>客户已接收</option>
           </select>
           <input id="fKeyword" placeholder="订单号 / 唛头 / 物流单号" style="width: 190px" />
           <button class="btn sm" onclick="loadOrders()">🔍 搜索</button>
@@ -193,7 +195,7 @@
           ? atts
               .map(
                 (a) =>
-                  `<a style="color:#2e7d32;margin-right:12px" href="${CFG.API_BASE}/api/file/${encodeURIComponent(a.key)}" target="_blank">${esc(a.name)}${
+                  `<a style="color:#2e7d32;margin-right:12px" href="${fileUrl(a.key)}" target="_blank">${esc(a.name)}${
                     a.size ? `<span style="color:#9ca3af">(${fmtSize(a.size)})</span>` : ""
                   }</a>`
               )
@@ -230,7 +232,7 @@
                     (r) =>
                       `${esc(r.fbaNo)}（${esc(r.boxes)} 箱）${
                         r.fileKey
-                          ? ` · <a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
+                          ? ` · <a style="color:#2e7d32" href="${fileUrl(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
                           : ""
                       }`
                   )
@@ -244,7 +246,7 @@
             ${row("发货人", o.senderName + (o.senderPhone ? " / " + o.senderPhone : ""))}
             ${row("发货地址", o.senderAddress)}
             ${o.podKey
-              ? `<div class="field" style="margin-bottom:10px"><label style="width:96px">签收凭证</label><div style="flex:1"><a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a></div></div>`
+              ? `<div class="field" style="margin-bottom:10px"><label style="width:96px">签收凭证</label><div style="flex:1"><a style="color:#2e7d32" href="${fileUrl(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a></div></div>`
               : ""}
             <div class="field" style="margin-bottom:10px"><label style="width:96px">附件</label><div style="flex:1">${attHtml}</div></div>
           </div>

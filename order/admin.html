@@ -55,7 +55,9 @@
             <select id="aStatus">
               <option value="">订单状态</option>
               <option>待入仓</option><option>已入库</option><option>已出仓</option>
-              <option>派送中</option><option>派送完成</option><option>客户已接收</option>
+              <option>已发出</option><option>运输中</option><option>已到港</option>
+              <option>清关中</option><option>派送中</option><option>派送完成</option>
+              <option>签收</option><option>客户已接收</option>
             </select>
             <input id="aKeyword" placeholder="订单号 / 唛头 / 客户代码 / 物流单号" style="width: 220px" />
             <button class="btn sm" onclick="loadAdminOrders()">🔍 搜索</button>
@@ -253,7 +255,7 @@
         document.getElementById("orderBox").innerHTML = `
           <h3>录入订单 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(o.code)} / ${esc(channelName(o.channel))}）· 唛头 ${esc(o.markingNo || "-")}</h3>
           <div class="form-grid">
-            ${sel("status", "最新动态", ["待入仓", "已入库", "已出仓", "派送中", "派送完成", "客户已接收"])}
+            ${sel("status", "最新动态", ["待入仓", "已入库", "已出仓", "已发出", "运输中", "已到港", "清关中", "派送中", "派送完成", "签收", "客户已接收"])}
             ${inp("statusTime", "动态时间", "date")}
             ${inp("weightKg", "重量(KG)", "number")}
             ${inp("volumeCbm", "体积(CBM)", "number")}
@@ -292,7 +294,7 @@
                   (r) =>
                     `${esc(r.fbaNo)}（${esc(r.boxes)} 箱）${
                       r.fileKey
-                        ? ` · <a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
+                        ? ` · <a style="color:#2e7d32" href="${fileUrl(r.fileKey)}" target="_blank">${esc(r.fileName || "箱唛文件")}</a>`
                         : ""
                     }`
                 )
@@ -304,7 +306,7 @@
               ? attList
                   .map(
                     (a) =>
-                      `<a style="color:#2e7d32;margin-right:10px" href="${CFG.API_BASE}/api/file/${encodeURIComponent(a.key)}" target="_blank">${esc(a.name)}${
+                      `<a style="color:#2e7d32;margin-right:10px" href="${fileUrl(a.key)}" target="_blank">${esc(a.name)}${
                         a.size ? `<span style="color:#9ca3af">(${fmtSize(a.size)})</span>` : ""
                       }</a>`
                   )
@@ -314,7 +316,7 @@
           <div class="field" style="margin-bottom:10px">
             <label style="width:92px">签收凭证</label>
             <div style="flex: 1">
-              ${o.podKey ? `<div style="margin-bottom:6px;font-size:13px">当前：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a>（不选新文件则保持不变）</div>` : ""}
+              ${o.podKey ? `<div style="margin-bottom:6px;font-size:13px">当前：<a style="color:#2e7d32" href="${fileUrl(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a>（不选新文件则保持不变）</div>` : ""}
               <input type="file" id="oe_podFile" accept=".pdf,.png,.jpg,.jpeg" style="font-size: 13px" />
               <div class="hint">支持 PDF / 图片（图片自动压缩），保存后自动同步到客户界面「订单详情 · 签收凭证」</div>
             </div>
@@ -495,7 +497,7 @@
         <div class="field" style="margin-bottom:12px"><label style="width:80px">证件</label>
           <div style="flex:1">
             <input type="file" id="pe_idFile" accept=".pdf,.png,.jpg,.jpeg" style="font-size:13px" />
-            <div class="hint" id="pe_idHint">${u.idFileKey ? `当前：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(u.idFileKey)}" target="_blank">${esc(u.idFileName || "查看")}</a>（不选则保持不变）` : "未上传，可选一个文件上传"}</div>
+            <div class="hint" id="pe_idHint">${u.idFileKey ? `当前：<a style="color:#2e7d32" href="${fileUrl(u.idFileKey)}" target="_blank">${esc(u.idFileName || "查看")}</a>（不选则保持不变）` : "未上传，可选一个文件上传"}</div>
           </div>
         </div>
         <div class="modal-foot">

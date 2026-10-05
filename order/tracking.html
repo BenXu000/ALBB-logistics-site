@@ -117,7 +117,7 @@
       try {
         const data = await api("/api/orders");
         const orders = (data.orders || [])
-          .filter((o) => !["派送完成", "客户已接收"].includes(o.status))
+          .filter((o) => !["派送完成", "客户已接收", "签收"].includes(o.status))
           .slice(0, 50);
         document.getElementById("ordersBody").innerHTML = orders.length
           ? orders
