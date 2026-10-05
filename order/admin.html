@@ -59,14 +59,14 @@
               <option>清关中</option><option>派送中</option><option>派送完成</option>
               <option>签收</option><option>客户已接收</option>
             </select>
-            <input id="aKeyword" placeholder="订单号 / 唛头 / 客户代码 / 物流单号" style="width: 220px" />
+            <input id="aKeyword" placeholder="订单号 / 唛头 / 入仓号 / 客户代码 / 物流单号" style="width: 220px" />
             <button class="btn sm" onclick="loadAdminOrders()">🔍 搜索</button>
           </div>
           <div class="card table-wrap" style="padding: 8px 0 0">
             <table class="grid">
               <thead>
                 <tr>
-                  <th>#</th><th>客户</th><th>订单号</th><th>唛头</th><th>频道</th>
+                  <th>#</th><th>客户</th><th>订单号</th><th>唛头 / 入仓号</th><th>频道</th>
                   <th>仓库</th><th>箱数</th><th>重量(KG)</th><th>计费重</th><th>单价</th>
                   <th>最新动态</th><th>签收时间</th><th>物流单号</th><th>操作</th>
                 </tr>
@@ -226,7 +226,7 @@
                   <td>${esc(o.trackingNo || "-")}</td>
                   <td>
                     <a href="javascript:void(0)" style="color:#e09612" onclick="openOrderEdit('${o.id}')">✏️ 录入/编辑</a>
-                    &nbsp;<a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(allOrders['${o.id}'])" title="打印外箱唛头（10×10cm）">🖨 唛头</a>
+                    &nbsp;<a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(allOrders['${o.id}'])" title="打印外箱${markTerm(o)}（10×10cm）">🖨 ${markTerm(o)}</a>
                   </td>
                 </tr>`
               )
@@ -268,7 +268,7 @@
         ];
         allOrders[o.id] = o;
         document.getElementById("orderBox").innerHTML = `
-          <h3>录入订单 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(o.code)} / ${esc(channelName(o.channel))}）· 唛头 ${esc(o.markingNo || "-")}</h3>
+          <h3>录入订单 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(o.code)} / ${esc(channelName(o.channel))}）· ${markTerm(o)} ${esc(o.markingNo || "-")}</h3>
           <div class="form-grid">
             ${sel("status", "最新动态", ["待入仓", "已入库", "已出仓", "已发出", "运输中", "已到港", "清关中", "派送中", "派送完成", "签收", "客户已接收"])}
             ${inp("statusTime", "动态时间", "date")}
@@ -339,7 +339,7 @@
           </div>
           <div class="modal-foot">
             <button class="btn ghost" style="color:#dc2626;border-color:#fca5a5" onclick="deleteOrder('${o.id}')">🗑 删除订单</button>
-            <button class="btn ghost" onclick="printLabels(allOrders['${o.id}'])">🖨 打印唛头</button>
+            <button class="btn ghost" onclick="printLabels(allOrders['${o.id}'])">🖨 打印${markTerm(o)}</button>
             <button class="btn ghost" onclick="document.getElementById('orderMask').style.display='none'">取消</button>
             <button class="btn orange" id="oeSave">✔ 保存</button>
           </div>`;

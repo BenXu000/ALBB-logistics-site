@@ -20,7 +20,7 @@
             <datalist id="custList"></datalist>
           </div>
           <div class="hint" style="margin-left: 98px">
-            订单将归属到该客户名下（客户登录后可看到这笔订单与唛头）。客户代码可直接输入或从下拉中选择。
+            订单将归属到该客户名下（客户登录后可看到这笔订单与标签信息）。客户代码可直接输入或从下拉中选择。
           </div>
         </div>
 
@@ -380,12 +380,16 @@
             attachments,
           },
         });
-        toast(`下单成功！订单号 ${data.order.orderNo} · 唛头 ${data.order.markingNo}`, "ok");
-        // 下单成功即可打印外箱唛头（10×10cm，每箱一张）
+        const okOrder = data.order;
+        toast(
+          `下单成功！${okOrder.orderNo ? "订单号 " + okOrder.orderNo + " · " : ""}${markTerm(okOrder)} ${okOrder.markingNo}`,
+          "ok"
+        );
+        // 下单成功即可打印外箱标签（10×10cm，每箱一张）
         if (confirm(
-          `下单成功！\n订单号：${data.order.orderNo}\n唛头：${data.order.markingNo}\n箱数：${data.order.pieces} 件\n\n是否立即打印外箱唛头 LABEL（10×10cm，共 ${data.order.pieces} 张）？`
+          `下单成功！\n${okOrder.orderNo ? "订单号：" + okOrder.orderNo + "\n" : ""}${markTerm(okOrder)}：${okOrder.markingNo}\n箱数：${okOrder.pieces} 件\n\n是否立即打印外箱标签（10×10cm，共 ${okOrder.pieces} 张）？`
         )) {
-          printLabels(data.order);
+          printLabels(okOrder);
         }
         setTimeout(() => {
           // 管理员代客下单完成后返回后台订单管理；客户下单后回到订单列表

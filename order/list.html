@@ -24,7 +24,7 @@
             <option>清关中</option><option>派送中</option><option>派送完成</option>
             <option>签收</option><option>客户已接收</option>
           </select>
-          <input id="fKeyword" placeholder="订单号 / 唛头 / 物流单号" style="width: 190px" />
+          <input id="fKeyword" placeholder="订单号 / 唛头 / 入仓号 / 物流单号" style="width: 190px" />
           <button class="btn sm" onclick="loadOrders()">🔍 搜索</button>
           <button class="btn sm orange" onclick="location.href='index.html'">＋ 新建订单</button>
         </div>
@@ -33,7 +33,7 @@
           <table class="grid" id="tbl">
             <thead>
               <tr>
-                <th>#</th><th>订单号</th><th>唛头</th><th>仓库类型</th>
+                <th>#</th><th>订单号</th><th id="thMark">唛头 / 入仓号</th><th>仓库类型</th>
                 <th>箱数</th><th>重量(KG)</th><th>计费重</th><th>计费体积</th>
                 <th>单价</th><th>最新动态</th><th>时间</th><th>预计出仓</th>
                 <th>签收时间</th><th>备注</th><th>物流单号</th><th>操作</th>
@@ -60,6 +60,9 @@
     // 频道标签
     const params = new URLSearchParams(location.search);
     let curChannel = params.get("channel") || "";
+    // 表头称谓：阿联酋频道显示「入仓号」，沙特频道显示「唛头」，未指定频道则并列
+    const markHeader = curChannel.startsWith("uae") ? "入仓号" : curChannel.startsWith("saudi") ? "唛头" : "唛头 / 入仓号";
+    document.getElementById("thMark").textContent = markHeader;
     const tabsEl = document.getElementById("tabs");
     tabsEl.innerHTML =
       `<a class="tab${!curChannel ? " active" : ""}" href="list.html">全部</a>` +
@@ -157,7 +160,7 @@
               <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${esc(o.remark || "-")}</td>
               <td>${esc(o.trackingNo || "-")}</td>
               <td>
-                <a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(fullOrders['${o.id}'])" title="打印外箱唛头（10×10cm，每箱一张）">🖨 唛头</a>
+                <a href="javascript:void(0)" style="color:#2e7d32" onclick="printLabels(fullOrders['${o.id}'])" title="打印外箱${markTerm(o)}（10×10cm，每箱一张）">🖨 ${markTerm(o)}</a>
                 <a href="javascript:void(0)" style="color:#e09612" onclick="showDetail('${o.id}')">📝 详情</a>
               </td>
             </tr>`
@@ -205,7 +208,7 @@
         document.getElementById("detailBox").innerHTML = `
           <h3>订单详情 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(channelName(o.channel))}）</h3>
           <div class="form-grid">
-            ${row("唛头", o.markingNo || "-")}
+            ${row(markTerm(o), o.markingNo || "-")}
             ${rowHtml("状态", statusPill(o.status))}
             ${row("交货仓库", o.warehouse)}
             ${row("箱数/件数", o.pieces)}
@@ -253,7 +256,7 @@
           <h3 style="margin-top:18px">物流动态</h3>
           <ul class="timeline" id="dTracks">${trackHist || "<li><div class='t-status'>暂无动态</div></li>"}</ul>
           <div class="modal-foot">
-            <button class="btn orange" onclick="printLabels(fullOrders['${o.id}'])">🖨 打印唛头（10×10cm）</button>
+            <button class="btn orange" onclick="printLabels(fullOrders['${o.id}'])">🖨 打印${markTerm(o)}（10×10cm）</button>
             ${o.trackingNo ? `<button class="btn ghost" onclick="location.href='tracking.html?no=${encodeURIComponent(o.trackingNo)}'">🔍 查运踪</button>` : ""}
             <button class="btn" onclick="document.getElementById('detailMask').style.display='none'">关 闭</button>
           </div>`;
