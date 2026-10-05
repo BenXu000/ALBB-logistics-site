@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>订单列表 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=1005" />
 </head>
 <body>
   <div class="layout">
@@ -52,8 +52,8 @@
     <div class="modal" id="detailBox"></div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/common.js"></script>
+  <script src="js/config.js?v=1005"></script>
+  <script src="js/common.js?v=1005"></script>
   <script>
     renderShell("", "订单列表");
 
@@ -184,6 +184,8 @@
         const { order: o } = await api("/api/orders/" + id);
         fullOrders[o.id] = o;
         const row = (k, v) => `<div class="field" style="margin-bottom:10px"><label style="width:96px">${k}</label><div style="flex:1">${esc(v || "-")}</div></div>`;
+        // 值本身是可信 HTML（如状态徽章）时用这个，不转义
+        const rowHtml = (k, v) => `<div class="field" style="margin-bottom:10px"><label style="width:96px">${k}</label><div style="flex:1">${v || "-"}</div></div>`;
         const trackHist = (o.history || [])
           .map((h) => `<li><div class="t-time">${esc(h.time)} · ${esc(h.by)}</div><div class="t-status">${esc(h.status)}</div></li>`)
           .join("");
@@ -205,7 +207,7 @@
           <h3>订单详情 · <span style="color:#2e7d32">${esc(o.orderNo || o.asn || "-")}</span>（${esc(channelName(o.channel))}）</h3>
           <div class="form-grid">
             ${row("唛头", o.markingNo || "-")}
-            ${row("状态", statusPill(o.status))}
+            ${rowHtml("状态", statusPill(o.status))}
             ${row("入库日期", o.createdAt)}
             ${row("交货仓库", o.warehouse)}
             ${row("箱数/件数", o.pieces)}
