@@ -89,6 +89,11 @@ function fmtPrice(n) {
   return v ? v.toFixed(2) : "";
 }
 
+/** 附件下载链接：浏览器 <a> 直接打开不带登录头，统一追加 token 查询参数 */
+function fileUrl(key) {
+  return `${CFG.API_BASE}/api/file/${encodeURIComponent(key)}?token=${encodeURIComponent(getToken())}`;
+}
+
 // ---------- 外箱唛头 LABEL（10×10cm，每箱一张，仓库凭此收货） ----------
 // 内容：唛头 LQYT+年月+序号 / 订单号 CKA-xxxxx(空运) SEA-xxxxx(海运) / 箱号 1/N…N/N / Made in China
 function printLabels(order) {
