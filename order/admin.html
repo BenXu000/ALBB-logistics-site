@@ -260,7 +260,9 @@
             ${inp("chargeWeight", "计费重", "number")}
             ${inp("chargeVolume", "计费体积", "number")}
             ${inp("unitPrice", "单价(￥)", "number")}
-            ${inp("totalAmount", "总金额(￥)", "number")}
+            ${inp("deliveryFeeUnit", "派送费单价(￥)", "number")}
+            ${inp("deliveryFeeQty", "派送费计费数量", "number")}
+            ${inp("totalAmount", "总金额(￥，自动算)", "number")}
             ${inp("etaOut", "预计出仓", "date")}
             ${inp("signedTime", "签收时间", "date")}
             ${inp("trackingNo", "物流单号")}
@@ -272,7 +274,10 @@
           <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
             发货渠道：${esc(channelName(o.channel))} · 仓库：${esc(o.warehouse || "-")} ·
             货物性质：${esc(o.goodsType || "-")} · 报关：${esc(o.customs || "-")} ·
-            总箱数/总件数：${esc(o.pieces || "-")}
+            总件数：${esc(o.pieces || "-")}
+          </p>
+          <p style="font-size:12px;color:#16a34a;margin-bottom:10px">
+            💡 总金额自动计算：运费（单价 × 计费重，无计费重时按计费体积）＋ 派送费（派送费单价 × 计费数量）。录入相关数字后总金额自动汇总，无需手填。
           </p>
           <p style="font-size:12px;color:#6b7280;margin-bottom:10px">
             派送：${esc(o.deliveryMode || "-")} ${esc(o.deliveryCity || "-")} ${esc(o.deliveryType || "-")} ·
@@ -306,16 +311,49 @@
                   .join("")
               : "无"}
           </p>
+          <div class="field" style="margin-bottom:10px">
+            <label style="width:92px">签收凭证</label>
+            <div style="flex: 1">
+              ${o.podKey ? `<div style="margin-bottom:6px;font-size:13px">当前：<a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a>（不选新文件则保持不变）</div>` : ""}
+              <input type="file" id="oe_podFile" accept=".pdf,.png,.jpg,.jpeg" style="font-size: 13px" />
+              <div class="hint">支持 PDF / 图片（图片自动压缩），保存后自动同步到客户界面「订单详情 · 签收凭证」</div>
+            </div>
+          </div>
           <div class="modal-foot">
             <button class="btn ghost" onclick="printLabels(allOrders['${o.id}'])">🖨 打印唛头</button>
             <button class="btn ghost" onclick="document.getElementById('orderMask').style.display='none'">取消</button>
             <button class="btn orange" id="oeSave">✔ 保存</button>
           </div>`;
         document.getElementById("orderMask").style.display = "flex";
+        // —— 总金额自动计算：运费(单价×计费重/计费体积) + 派送费(单价×计费数量) ——
+        const calcTotal = () => {
+          const numv = (k) => (document.getElementById("oe_" + k).value === "" ? 0 : Number(document.getElementById("oe_" + k).value));
+          const cw = numv("chargeWeight"), cv = numv("chargeVolume"), up = numv("unitPrice");
+          const dU = numv("deliveryFeeUnit"), dQ = numv("deliveryFeeQty");
+          const freight = up > 0 && (cw > 0 || cv > 0) ? up * (cw > 0 ? cw : cv) : 0;
+          const dfee = dU > 0 && dQ > 0 ? dU * dQ : 0;
+          document.getElementById("oe_totalAmount").value = freight > 0 || dfee > 0 ? Math.round((freight + dfee) * 100) / 100 : "";
+        };
+        ["unitPrice", "chargeWeight", "chargeVolume", "deliveryFeeUnit", "deliveryFeeQty"].forEach((k) =>
+          document.getElementById("oe_" + k).addEventListener("input", calcTotal)
+        );
+        calcTotal();
         document.getElementById("oeSave").addEventListener("click", async () => {
           const val = (k) => document.getElementById("oe_" + k).value;
           const num = (k) => (val(k) === "" ? 0 : Number(val(k)));
+          const btn = document.getElementById("oeSave");
           try {
+            btn.disabled = true;
+            // 签收凭证上传（管理员代客户传，同步到客户界面）
+            let podKey = o.podKey || "", podName = o.podName || "";
+            const podFile = document.getElementById("oe_podFile").files[0];
+            if (podFile) {
+              const up = await uploadOne(podFile, (msg) => {
+                btn.textContent = msg;
+              }, { code: o.code });
+              podKey = up.key;
+              podName = up.name;
+            }
             await api("/api/orders/" + id, {
               method: "PUT",
               body: {
@@ -326,6 +364,8 @@
                 chargeWeight: num("chargeWeight"),
                 chargeVolume: num("chargeVolume"),
                 unitPrice: num("unitPrice"),
+                deliveryFeeUnit: num("deliveryFeeUnit"),
+                deliveryFeeQty: num("deliveryFeeQty"),
                 totalAmount: num("totalAmount"),
                 etaOut: val("etaOut"),
                 signedTime: val("signedTime"),
@@ -334,6 +374,8 @@
                 warehouse: val("warehouse"),
                 pieces: num("pieces"),
                 remark: val("remark"),
+                podKey,
+                podName,
               },
             });
             toast("保存成功", "ok");
@@ -342,6 +384,8 @@
           } catch (e) {
             toast(e.message, "err");
           }
+          btn.disabled = false;
+          btn.textContent = "✔ 保存";
         });
       } catch (e) {
         toast(e.message, "err");

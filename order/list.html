@@ -71,6 +71,45 @@
 
     let fullOrders = {}; // id → 订单对象（列表行打印唛头用）
 
+    // ---- 最新动态 与实际运踪同步：抓取运踪接口，按关键词映射成简短状态 ----
+    const TRACK_RULES = [
+      [/签收|派送完成|客户已接收|deliver(ed)?|signed|pod\b/i, "签收", "s-派送完成"],
+      [/派送中|out for delivery|on delivery|delivering/i, "派送中", "s-派送中"],
+      [/清关|customs/i, "清关中", "s-已出仓"],
+      [/到达|抵达|arrival|arrived/i, "已到港", "s-已出仓"],
+      [/起飞|飞行|航班|运输|在途|中转|flight|in flight|transit|departed|airline|vessel|shipping/i, "运输中", "s-已出仓"],
+      [/出口|export|离港|起飞前|terminal|iata/i, "已发出", "s-已出仓"],
+      [/入库|入仓|收货|warehouse|received|inbound/i, "已入库", "s-已入库"],
+    ];
+    function mapTrackStatus(text) {
+      if (!text) return null;
+      for (const [re, label, cls] of TRACK_RULES) {
+        if (re.test(text)) return { label, cls };
+      }
+      return null;
+    }
+    /** 逐单拉取真实运踪，把「最新动态」列替换为实际进度关键词 */
+    async function syncStatusFromTracking(orders) {
+      const targets = orders.filter((o) => o.trackingNo).slice(0, 30);
+      for (const o of targets) {
+        const cell = document.getElementById("dyn_" + o.id);
+        if (!cell) continue;
+        try {
+          const resp = await fetch(`${CFG.TRACK_API}/?source=auto&trackingNo=${encodeURIComponent(o.trackingNo)}`);
+          const data = await resp.json();
+          const latestText = [data.currentActivity, (data.tracks || [])[0] && (data.tracks[0].status + " " + (data.tracks[0].statusEn || ""))]
+            .filter(Boolean)
+            .join(" ");
+          const mapped = mapTrackStatus(latestText);
+          if (mapped) {
+            cell.innerHTML = `<span class="status-pill ${mapped.cls}">${mapped.label}</span>`;
+          }
+        } catch (e) {
+          /* 单个查询失败不打断其他单 */
+        }
+      }
+    }
+
     async function loadOrders() {
       const tbody = document.getElementById("tbody");
       tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
@@ -110,7 +149,7 @@
               <td>${o.chargeWeight ? `<span class="badge">${esc(fmtPrice(o.chargeWeight))}</span>` : "-"}</td>
               <td>${o.chargeVolume ? `<span class="badge">${esc(fmtPrice(o.chargeVolume))}</span>` : "-"}</td>
               <td>${o.unitPrice ? `<span class="badge">￥${esc(fmtPrice(o.unitPrice))}</span>` : "-"}</td>
-              <td>${statusPill(o.status)}</td>
+              <td id="dyn_${o.id}" style="cursor:${o.trackingNo ? "pointer" : "default"}" title="${o.trackingNo ? "点击查看运踪" : ""}">${statusPill(o.status)}</td>
               <td>${esc(o.statusTime || "-")}</td>
               <td>${esc(o.etaOut || "-")}</td>
               <td>${esc(o.signedTime || "-")}</td>
@@ -122,6 +161,16 @@
               </td>
             </tr>`
           ).join("");
+        // 最新动态列：点击跳转运踪；并同步真实运踪关键词
+        for (const o of orders) {
+          if (!o.trackingNo) continue;
+          const cell = document.getElementById("dyn_" + o.id);
+          if (cell)
+            cell.addEventListener("click", () => {
+              location.href = "tracking.html?no=" + encodeURIComponent(o.trackingNo);
+            });
+        }
+        syncStatusFromTracking(orders);
       } catch (e) {
         tbody.innerHTML = "";
         toast(e.message, "err");
@@ -163,6 +212,8 @@
             ${row("计费重", o.chargeWeight)}
             ${row("计费体积", o.chargeVolume)}
             ${row("单价", o.unitPrice ? "￥" + o.unitPrice : "")}
+            ${row("计费重", o.chargeWeight)}
+            ${o.deliveryFeeUnit ? row("派送费", `￥${o.deliveryFeeUnit} × ${o.deliveryFeeQty || 0} = ￥${Math.round(o.deliveryFeeUnit * (o.deliveryFeeQty || 0) * 100) / 100}`) : ""}
             ${row("总金额", o.totalAmount ? "￥" + o.totalAmount : "")}
             ${row("是否报关", o.customs)}
             ${row("货物性质", o.goodsType)}
@@ -192,6 +243,9 @@
             ${row("备注", o.remark)}
             ${row("发货人", o.senderName + (o.senderPhone ? " / " + o.senderPhone : ""))}
             ${row("发货地址", o.senderAddress)}
+            ${o.podKey
+              ? `<div class="field" style="margin-bottom:10px"><label style="width:96px">签收凭证</label><div style="flex:1"><a style="color:#2e7d32" href="${CFG.API_BASE}/api/file/${encodeURIComponent(o.podKey)}" target="_blank">${esc(o.podName || "查看签收凭证")}</a></div></div>`
+              : ""}
             <div class="field" style="margin-bottom:10px"><label style="width:96px">附件</label><div style="flex:1">${attHtml}</div></div>
           </div>
           <h3 style="margin-top:18px">物流动态</h3>
