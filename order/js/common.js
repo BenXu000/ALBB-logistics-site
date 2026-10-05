@@ -132,7 +132,7 @@ function printLabels(order) {
       }
       .lbl:last-child { page-break-after: auto; }
       .row1 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
-      .row2 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
+      .row2 { font-size: 20pt; font-weight: 700; letter-spacing: 0.3mm; white-space: nowrap; }
       .boxno { font-size: 34pt; font-weight: 800; text-align: center; }
       .mic { font-size: 15pt; font-weight: 600; text-align: center; letter-spacing: 1.5mm; }
       .print-tip { padding: 20px; font: 14px "Microsoft YaHei"; color: #555; }
