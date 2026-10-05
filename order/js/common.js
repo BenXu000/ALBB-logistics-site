@@ -211,7 +211,7 @@ function fmtSize(bytes) {
  * 上传单个文件（图片自动压缩），返回 {key, name, size}
  * @param {(msg:string)=>void} onStep 进度提示
  */
-async function uploadOne(file, onStep = () => {}) {
+async function uploadOne(file, onStep = () => {}, opts = {}) {
   let blob = file;
   let name = file.name;
   if (isImageFile(file)) {
@@ -230,7 +230,7 @@ async function uploadOne(file, onStep = () => {}) {
   }
   const up = await api("/api/upload", {
     method: "POST",
-    body: { name, dataBase64: await blobToBase64(blob) },
+    body: { name, dataBase64: await blobToBase64(blob), ...(opts.code ? { code: opts.code } : {}) },
   });
   return { key: up.key, name: up.name || name, size: up.size || blob.size };
 }
@@ -278,10 +278,136 @@ function renderShell(page, title) {
 
   document.getElementById("topbar").innerHTML = `
     <div class="page-title">${esc(title)}</div>
-    <div class="user-box">
+    <div class="user-box" style="position: relative">
       ${isAdmin ? '<span class="badge orange">管理员</span>' : ""}
-      <span>客户代码 <b>${esc(user ? user.code : "")}</b></span>
-      <button class="btn ghost sm" onclick="logout()">退出</button>
+      <button class="btn ghost sm" id="userMenuBtn" style="border: none">👤 客户代码 <b>${esc(user ? user.code : "")}</b> ▾</button>
+      <div class="user-menu" id="userMenu" style="display: none">
+        <a href="profile.html">个人资料 / Profile</a>
+        <button type="button" onclick="openChangePwd()">修改密码 / Password</button>
+        <button type="button" onclick="openWechatBind()">绑定/解绑微信 Wechat</button>
+        <button type="button" class="danger" onclick="logout()">退出 / Logout</button>
+      </div>
     </div>`;
+
+  const menuBtn = document.getElementById("userMenuBtn");
+  const menu = document.getElementById("userMenu");
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+  });
+  document.addEventListener("click", () => (menu.style.display = "none"));
+  menu.addEventListener("click", (e) => e.stopPropagation());
   return user;
+}
+
+// ---------- 个人中心：修改密码 / 绑定解绑微信（全局弹窗） ----------
+function openUserModalBox(innerHtml, width = "460px") {
+  document.querySelectorAll(".modal-mask[data-usermodal]").forEach((m) => m.remove());
+  const mask = document.createElement("div");
+  mask.className = "modal-mask";
+  mask.setAttribute("data-usermodal", "1");
+  mask.style.display = "flex";
+  mask.innerHTML = `<div class="modal" style="width:${width}">${innerHtml}</div>`;
+  mask.addEventListener("click", (e) => {
+    if (e.target === mask) mask.remove();
+  });
+  document.body.appendChild(mask);
+  return mask;
+}
+
+/** 修改密码弹窗 */
+function openChangePwd() {
+  const mask = openUserModalBox(`
+    <h3>修改密码 / Change Password</h3>
+    <div class="field" style="margin-bottom:12px"><label style="width:88px" class="req">原密码</label><input id="upw_old" type="password" /></div>
+    <div class="field" style="margin-bottom:12px"><label style="width:88px" class="req">新密码</label><input id="upw_new" type="password" placeholder="至少 6 位" /></div>
+    <div class="field" style="margin-bottom:12px"><label style="width:88px" class="req">确认新密码</label><input id="upw_new2" type="password" /></div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="this.closest('.modal-mask').remove()">取消</button>
+      <button class="btn orange" id="upwSave">✔ 确认修改</button>
+    </div>`);
+  mask.querySelector("#upwSave").addEventListener("click", async () => {
+    const oldPwd = mask.querySelector("#upw_old").value;
+    const newPwd = mask.querySelector("#upw_new").value;
+    const newPwd2 = mask.querySelector("#upw_new2").value;
+    if (!oldPwd) return toast("请输入原密码", "err");
+    if (newPwd.length < 6) return toast("新密码至少 6 位", "err");
+    if (newPwd !== newPwd2) return toast("两次输入的新密码不一致", "err");
+    const btn = mask.querySelector("#upwSave");
+    btn.disabled = true;
+    try {
+      await api("/api/password", { method: "PUT", body: { oldPassword: oldPwd, newPassword: newPwd } });
+      toast("密码修改成功，下次登录请使用新密码", "ok");
+      mask.remove();
+    } catch (e) {
+      toast(e.message, "err");
+      btn.disabled = false;
+    }
+  });
+  mask.querySelector("#upw_old").focus();
+}
+
+/** 绑定 / 解绑微信弹窗 */
+async function openWechatBind() {
+  let current = (getLoginUser() || {}).wechat || "";
+  // 拉最新资料，避免 localStorage 里的旧数据
+  try {
+    const { profile } = await api("/api/profile");
+    current = profile.wechat || "";
+    const u = getLoginUser();
+    if (u) {
+      u.wechat = current;
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
+    }
+  } catch (e) {
+    /* 静默：用本地值 */
+  }
+  const bound = !!current;
+  const mask = openUserModalBox(`
+    <h3>绑定/解绑微信 / Wechat</h3>
+    <p style="font-size:12.5px;color:#6b7280;margin-bottom:12px">
+      当前状态：${bound ? `已绑定 <b style="color:#2e7d32">${esc(current)}</b>` : '<span style="color:#dc2626">未绑定</span>'}
+    </p>
+    <div class="field" style="margin-bottom:12px">
+      <label style="width:88px" class="req">微信号</label>
+      <input id="uwc_input" placeholder="${bound ? "输入新微信号可更换绑定" : "请输入您的微信号"}" />
+    </div>
+    <div class="modal-foot">
+      ${bound ? '<button class="btn ghost" id="uwcUnbind" style="color:#dc2626;border-color:#dc2626">解绑微信</button>' : ""}
+      <button class="btn ghost" onclick="this.closest('.modal-mask').remove()">取消</button>
+      <button class="btn orange" id="uwcSave">✔ ${bound ? "更换绑定" : "绑定"}</button>
+    </div>`);
+  mask.querySelector("#uwcSave").addEventListener("click", async () => {
+    const wechat = mask.querySelector("#uwc_input").value.trim();
+    if (!wechat) return toast("请输入微信号", "err");
+    try {
+      const r = await api("/api/wechat", { method: "PUT", body: { action: "bind", wechat } });
+      const u = getLoginUser();
+      if (u) {
+        u.wechat = r.wechat;
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
+      }
+      toast("微信绑定成功", "ok");
+      mask.remove();
+    } catch (e) {
+      toast(e.message, "err");
+    }
+  });
+  const unbindBtn = mask.querySelector("#uwcUnbind");
+  if (unbindBtn)
+    unbindBtn.addEventListener("click", async () => {
+      if (!confirm("确定解绑微信吗？")) return;
+      try {
+        const r = await api("/api/wechat", { method: "PUT", body: { action: "unbind" } });
+        const u = getLoginUser();
+        if (u) {
+          u.wechat = r.wechat;
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u));
+        }
+        toast("微信已解绑", "ok");
+        mask.remove();
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    });
 }
