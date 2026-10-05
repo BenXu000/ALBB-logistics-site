@@ -95,17 +95,19 @@ function fileUrl(key) {
 }
 
 // ---------- 外箱唛头 LABEL（10×10cm，每箱一张，仓库凭此收货） ----------
-// 内容：唛头 LQYT+年月+序号 / 订单号 CKA-xxxxx(空运) SEA-xxxxx(海运) / 箱号 1/N…N/N / Made in China
+// 内容：唛头 LQYT+年月+序号 / 入仓号 固定 CKA-42210(空运) CKS-42210(海运) / 箱号 1/N…N/N / Made in China
 function printLabels(order) {
   const n = Math.max(1, Number(order.pieces) || 1);
   const marking = order.markingNo || "";
-  const orderNo = order.orderNo || "";
+  // 入仓号固定：空运 CKA-42210 / 海运 CKS-42210（不随订单号递增）
+  const isAir = (order.channel || "").endsWith("-air") || /^CKA/i.test(order.orderNo || "");
+  const asnNo = isAir ? "CKA-42210" : "CKS-42210";
   const labels = [];
   for (let i = 1; i <= n; i++) {
     labels.push(
       `<div class="lbl">
         <div class="row1">唛头：${esc(marking)}</div>
-        <div class="row2">订单号：${esc(orderNo)}</div>
+        <div class="row2">入仓号：${asnNo}</div>
         <div class="boxno">${i}/${n}</div>
         <div class="mic">Made in China</div>
       </div>`
@@ -130,7 +132,7 @@ function printLabels(order) {
       }
       .lbl:last-child { page-break-after: auto; }
       .row1 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
-      .row2 { font-size: 16pt; font-weight: 600; }
+      .row2 { font-size: 24pt; font-weight: 700; letter-spacing: 0.5mm; }
       .boxno { font-size: 34pt; font-weight: 800; text-align: center; }
       .mic { font-size: 15pt; font-weight: 600; text-align: center; letter-spacing: 1.5mm; }
       .print-tip { padding: 20px; font: 14px "Microsoft YaHei"; color: #555; }
