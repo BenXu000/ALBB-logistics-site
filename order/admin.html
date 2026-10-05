@@ -155,9 +155,9 @@
         const pct = Math.min(100, (s.bytes / s.quotaBytes) * 100);
         const color = pct > 80 ? "#dc2626" : pct > 60 ? "#f5a623" : "#16a34a";
         document.getElementById("storageCard").innerHTML = `
-          <span style="color:#6b7280">附件存储用量（Cloudflare KV 免费额度 1GB）：</span>
+          <span style="color:#6b7280">附件存储用量（Cloudflare KV 免费额度 1GB，含订仓表/箱唛/签收凭证/证件）：</span>
           <b style="color:${color}">${usedMB.toFixed(1)} MB / ${quotaMB.toFixed(0)} MB（${pct.toFixed(1)}%）</b>
-          <span style="color:#6b7280">　共 ${s.count} 个附件</span>
+          <span style="color:#6b7280">　共 ${s.count} 个文件</span>
           ${pct > 80 ? '<div style="color:#dc2626;margin-top:6px">⚠️ 接近免费额度上限，建议开通 R2 或清理旧订单附件</div>' : ""}`;
       } catch (e) {
         document.getElementById("storageCard").textContent = "存储用量：读取失败（Worker 需为最新版本）";
@@ -234,6 +234,21 @@
           : '<tr><td colspan="14" style="text-align:center;color:#6b7280;padding:30px">暂无订单</td></tr>';
       } catch (e) {
         body.innerHTML = "";
+        toast(e.message, "err");
+      }
+    }
+
+    // 删除订单（仅管理员；弹窗二次确认，一经删除无法恢复）
+    async function deleteOrder(id) {
+      const o = allOrders[id];
+      const label = o ? `${o.orderNo || o.asn || id}（${o.code} / ${channelName(o.channel)}）` : id;
+      if (!confirm(`请确认是否删除此订单，一经删除将无法恢复！\n\n订单号：${label}\n\n删除后该订单及其附件（订仓表、箱唛、签收凭证等）将一并清除。`)) return;
+      try {
+        await api("/api/orders/" + id, { method: "DELETE" });
+        toast("订单已删除", "ok");
+        document.getElementById("orderMask").style.display = "none";
+        loadOrders();
+      } catch (e) {
         toast(e.message, "err");
       }
     }
@@ -323,6 +338,7 @@
             </div>
           </div>
           <div class="modal-foot">
+            <button class="btn ghost" style="color:#dc2626;border-color:#fca5a5" onclick="deleteOrder('${o.id}')">🗑 删除订单</button>
             <button class="btn ghost" onclick="printLabels(allOrders['${o.id}'])">🖨 打印唛头</button>
             <button class="btn ghost" onclick="document.getElementById('orderMask').style.display='none'">取消</button>
             <button class="btn orange" id="oeSave">✔ 保存</button>
@@ -545,6 +561,8 @@
         <h3>编辑公司资料 · ${esc(code)}</h3>
         <p style="font-size:12px;color:#6b7280;margin-bottom:10px">客户侧只读，修改后立即生效。</p>
         <div class="form-grid">
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">客户代码</label><input value="${esc(code)}" readonly style="background:#f3f4f6;color:#6b7280" title="客户代码是登录账号，开通后不可修改" /></div>
+          <div class="field" style="margin-bottom:12px"><label style="width:80px">开通日期</label><input value="${esc(u.createdAt || "-")}" readonly style="background:#f3f4f6;color:#6b7280" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">公司名称</label><input id="pe_company" value="${esc(u.company || "")}" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">公司简称</label><input id="pe_shortName" value="${esc(u.shortName || "")}" /></div>
           <div class="field" style="margin-bottom:12px"><label style="width:80px">联系人</label><input id="pe_contact" value="${esc(u.contact || "")}" /></div>
