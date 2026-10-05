@@ -357,3 +357,39 @@ table.grid tr:hover td { background: #f6f9fd; }
   .form-grid { grid-template-columns: 1fr; }
   .field label { width: 74px; }
 }
+
+/* ---------- 顶栏用户下拉菜单（个人资料/修改密码/绑定微信/退出） ---------- */
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 60;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.user-menu a,
+.user-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.user-menu a:hover,
+.user-menu button:hover {
+  background: var(--albb-blue-light);
+}
+.user-menu button.danger {
+  color: #dc2626;
+}
