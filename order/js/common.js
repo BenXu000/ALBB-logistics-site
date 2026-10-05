@@ -94,20 +94,29 @@ function fileUrl(key) {
   return `${CFG.API_BASE}/api/file/${encodeURIComponent(key)}?token=${encodeURIComponent(getToken())}`;
 }
 
-// ---------- 外箱唛头 LABEL（10×10cm，每箱一张，仓库凭此收货） ----------
-// 内容：唛头 LQYT+年月+序号 / 入仓号 固定 CKA-42210(空运) CKS-42210(海运) / 箱号 1/N…N/N / Made in China
+// ---------- 外箱标签 LABEL（10×10cm，每箱一张，仓库凭此收货） ----------
+// 内容：沙特 唛头 LQYT+年月+序号 + 入仓号 固定 CKA-42210/CKS-42210；阿联酋 只有「入仓号 ALBBWL+年月+序号」（无固定入仓号行）
+// 阿联酋订单：唛头号在系统与 LABEL 上均称为「入仓号」
+function isUAEOrder(o) {
+  return !!(o && ((o.channel || "").startsWith("uae") || /^ALBBWL/i.test(o.markingNo || "")));
+}
+/** 唛头号在界面上的称谓：阿联酋=入仓号，沙特=唛头 */
+function markTerm(o) {
+  return isUAEOrder(o) ? "入仓号" : "唛头";
+}
 function printLabels(order) {
   const n = Math.max(1, Number(order.pieces) || 1);
   const marking = order.markingNo || "";
-  // 入仓号固定：空运 CKA-42210 / 海运 CKS-42210（不随订单号递增）
+  const isUAE = isUAEOrder(order);
+  // 固定入仓号仅沙特使用：空运 CKA-42210 / 海运 CKS-42210（不随订单号递增）
   const isAir = (order.channel || "").endsWith("-air") || /^CKA/i.test(order.orderNo || "");
   const asnNo = isAir ? "CKA-42210" : "CKS-42210";
   const labels = [];
   for (let i = 1; i <= n; i++) {
     labels.push(
       `<div class="lbl">
-        <div class="row1">唛头：${esc(marking)}</div>
-        <div class="row2">入仓号：${asnNo}</div>
+        <div class="row1">${markTerm(order)}：${esc(marking)}</div>
+        ${isUAE ? "" : `<div class="row2">入仓号：${asnNo}</div>`}
         <div class="boxno">${i}/${n}</div>
         <div class="mic">Made in China</div>
       </div>`
@@ -119,7 +128,7 @@ function printLabels(order) {
     return;
   }
   w.document.write(
-    `<!DOCTYPE html><html><head><meta charset="utf-8"><title>外箱唛头 ${esc(marking)}（共${n}张）</title>
+    `<!DOCTYPE html><html><head><meta charset="utf-8"><title>外箱${markTerm(order)} ${esc(marking)}（共${n}张）</title>
     <style>
       @page { size: 100mm 100mm; margin: 0; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
