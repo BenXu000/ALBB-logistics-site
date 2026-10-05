@@ -208,7 +208,7 @@
           <div class="form-grid">
             ${row("唛头", o.markingNo || "-")}
             ${rowHtml("状态", statusPill(o.status))}
-            ${row("入库日期", o.createdAt)}
+            ${rowHtml("入库日期", `<span id="dInbound">${esc(o.createdAt)}</span>`)}
             ${row("交货仓库", o.warehouse)}
             ${row("箱数/件数", o.pieces)}
             ${row("重量(KG)", o.weightKg)}
@@ -253,15 +253,54 @@
             <div class="field" style="margin-bottom:10px"><label style="width:96px">附件</label><div style="flex:1">${attHtml}</div></div>
           </div>
           <h3 style="margin-top:18px">物流动态</h3>
-          <ul class="timeline">${trackHist || "<li><div class='t-status'>暂无动态</div></li>"}</ul>
+          <ul class="timeline" id="dTracks">${trackHist || "<li><div class='t-status'>暂无动态</div></li>"}</ul>
           <div class="modal-foot">
             <button class="btn orange" onclick="printLabels(fullOrders['${o.id}'])">🖨 打印唛头（10×10cm）</button>
             ${o.trackingNo ? `<button class="btn ghost" onclick="location.href='tracking.html?no=${encodeURIComponent(o.trackingNo)}'">🔍 查运踪</button>` : ""}
             <button class="btn" onclick="document.getElementById('detailMask').style.display='none'">关 闭</button>
           </div>`;
         document.getElementById("detailMask").style.display = "flex";
+        // —— 有物流单号时，实时抓取实际运踪：替换物流动态 + 校正入库日期 ——
+        if (o.trackingNo) syncDetailTracking(o.trackingNo);
       } catch (e) {
         toast(e.message, "err");
+      }
+    }
+
+    /** 打开详情时实时抓真实运踪：物流动态显示实际轨迹，入库日期按运踪中的入库/到仓事件同步 */
+    async function syncDetailTracking(trackingNo) {
+      const box = document.getElementById("dTracks");
+      const inboundEl = document.getElementById("dInbound");
+      if (!box) return;
+      try {
+        const resp = await fetch(`${CFG.TRACK_API}/?source=auto&trackingNo=${encodeURIComponent(trackingNo)}`);
+        const data = await resp.json();
+        const tracks = data.tracks || [];
+        if (tracks.length) {
+          box.innerHTML = `<li><div class="t-time">${esc(data.currentActivity || "")} · 实时运踪</div></li>` +
+            tracks
+              .map(
+                (t) =>
+                  `<li><div class="t-time">${esc(t.time || "")}</div><div class="t-status">${esc(t.status || "")}${
+                    t.statusEn && t.statusEn !== t.status ? ` <span style="color:#9ca3af;font-size:12px">${esc(t.statusEn)}</span>` : ""
+                  }</div></li>`
+              )
+              .join("");
+        }
+        // 入库日期：在运踪里找 入库/到仓/收货 类事件的时间，找到则替换显示
+        if (inboundEl) {
+          const inTrack = tracks.find((t) =>
+            /入库|到仓|进仓|收货|已签收入仓|warehouse\s*(receiving|received|inbound)|arrived\s*(at|in)\s*(the\s*)?warehouse|received\s*goods/i.test(
+              `${t.status || ""} ${t.statusEn || ""}`
+            )
+          );
+          if (inTrack && inTrack.time) {
+            const d = String(inTrack.time).trim();
+            inboundEl.textContent = /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10) : d;
+          }
+        }
+      } catch (e) {
+        /* 抓取失败保留原物流动态，不打断弹窗 */
       }
     }
 
