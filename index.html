@@ -653,11 +653,20 @@
             }
 
             if (!data.ok) {
-                resultDiv.innerHTML = `<div style="color:#c62828;">${escapeHtml(data.error || (zh ? '查询失败' : 'Query failed'))}</div>`;
+                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
                 return;
             }
 
             const traces = data.tracks || [];
+
+            // 识别承运商对"不存在的单号"返回的模板广告（如 gulf56 对任意单号都回模板假数据）
+            const junkMarks = ['国际快递专线查询系统', '请咨询代理', 'This tracking platform', 'Details could be given'];
+            const summaryJunk = !traces.length && typeof data.summary === 'string' &&
+                junkMarks.some(k => data.summary.indexOf(k) !== -1);
+            if (summaryJunk) {
+                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
+                return;
+            }
 
             // 站点明确返回"查无此单"时，直接给干净提示
             if (data.isExist === false) {
