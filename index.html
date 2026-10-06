@@ -661,7 +661,7 @@
 
             // 站点明确返回"查无此单"时，直接给干净提示
             if (data.isExist === false) {
-                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '未找到该运单的轨迹信息，请核对单号后重试' : 'No tracking records found. Please verify the number.'}</div>`;
+                resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
                 return;
             }
 
@@ -672,7 +672,7 @@
                     meta += `</div><div style="color:#8a6d3b; background:#fdf6e3; padding:8px 14px; border-radius:20px; display:inline-block;">${zh ? '运单已登记，轨迹明细待更新' : 'Registered, track details pending'}</div>`;
                     resultDiv.innerHTML = meta;
                 } else {
-                    resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '未找到该运单的轨迹信息' : 'No tracking records found'}</div>`;
+                    resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
                 }
                 return;
             }
