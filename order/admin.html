@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>管理后台 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css?v=1006" />
+  <link rel="stylesheet" href="css/style.css?v=1007" />
 </head>
 <body>
   <!-- ===== 登录界面 ===== -->
@@ -80,13 +80,18 @@
         <div id="view-users" style="display: none">
           <div class="filters">
             <button class="btn sm orange" onclick="openUserModal()">＋ 开通客户账号</button>
+            <button class="btn sm ghost" onclick="exportUsersExcel()">⬇ 导出 Excel</button>
+            <span style="color:#6b7280;font-size:12.5px">勾选「全选」或个别客户后导出；未勾选则导出全部</span>
           </div>
+          <div id="uWarn" style="display: none"></div>
           <div class="card table-wrap" style="padding: 8px 0 0">
             <table class="grid">
               <thead>
                 <tr>
+                  <th style="width:38px"><input type="checkbox" id="uSelAll" title="全选" onchange="toggleSelAll(this.checked)" /></th>
                   <th>#</th><th>客户代码</th><th>公司名称</th><th>联系人</th><th>电话</th>
-                  <th>邮箱</th><th>微信</th><th>业务员</th><th>客户地址</th><th>开通日期</th><th>状态</th><th>操作</th>
+                  <th>邮箱</th><th>微信</th><th>业务员</th><th>客户地址</th><th>开通日期</th>
+                  <th>最近发货</th><th>状态</th><th>操作</th>
                 </tr>
               </thead>
               <tbody id="aUsersBody"></tbody>
@@ -106,9 +111,9 @@
     <div class="modal" id="userBox" style="width: 560px"></div>
   </div>
 
-  <script src="js/region.js?v=1006"></script>
-  <script src="js/config.js?v=1006"></script>
-  <script src="js/common.js?v=1006"></script>
+  <script src="js/region.js?v=1007"></script>
+  <script src="js/config.js?v=1007"></script>
+  <script src="js/common.js?v=1007"></script>
   <script>
     const TOKEN_KEY = "albb_order_token";
     const USER_KEY = "albb_order_user";
@@ -415,17 +420,67 @@
     });
 
     // ---------- 客户账号 ----------
+    let USERS_CACHE = []; // 客户列表（含最近发货/预警计算结果），导出 Excel 用
+    const STALE_DAYS = 90; // 超过 90 天未发货 → 红色预警
+
+    /** 解析 YYYY-MM-DD / YYYY-MM-DD HH:mm 为时间戳（按北京时间），失败返回 0 */
+    function parseBJRough(s) {
+      if (!s) return 0;
+      const t = String(s).trim().replace(" ", "T");
+      const iso = /^\d{4}-\d{2}-\d{2}$/.test(t) ? t + "T00:00:00+08:00" : t + "+08:00";
+      const v = Date.parse(iso);
+      return isNaN(v) ? 0 : v;
+    }
+
     async function loadUsers() {
       const body = document.getElementById("aUsersBody");
-      body.innerHTML = '<tr><td colspan="12" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
+      body.innerHTML = '<tr><td colspan="14" style="text-align:center;color:#6b7280;padding:30px">加载中…</td></tr>';
       try {
-        const { users } = await api("/api/users");
-        body.innerHTML = users.length
-          ? users
-              .map(
-                (u, i) => `<tr>
+        // 同时取客户列表与全部订单，用于计算每个客户的「最近发货」日期
+        const [ur, or] = await Promise.all([api("/api/users"), api("/api/orders")]);
+        const users = ur.users || [];
+        const lastMap = {}; // 客户代码 → 最近下单时间
+        (or.orders || []).forEach((o) => {
+          const c = String(o.code || "").toUpperCase();
+          if (!c) return;
+          const t = o.createdAtTs || parseBJRough(o.createdAt);
+          if (!lastMap[c] || t > lastMap[c]) lastMap[c] = t;
+        });
+        const NOW = Date.now();
+        USERS_CACHE = users.map((u) => {
+          const lastTs = lastMap[String(u.code || "").toUpperCase()] || 0;
+          const days = lastTs ? Math.floor((NOW - lastTs) / 86400000) : null;
+          const stale = !lastTs || days > STALE_DAYS; // 从未发货 或 超过 90 天
+          return Object.assign({}, u, { _lastTs: lastTs, _days: days, _stale: stale });
+        });
+
+        // 顶部预警横幅
+        const staleList = USERS_CACHE.filter((u) => u._stale);
+        const warnEl = document.getElementById("uWarn");
+        if (staleList.length) {
+          warnEl.style.display = "block";
+          warnEl.style.cssText =
+            "display:block;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:13px;line-height:1.8";
+          warnEl.innerHTML =
+            `⚠️ <b>有 ${staleList.length} 位客户超过 3 个月未发货</b>（共 ${USERS_CACHE.length} 位）：` +
+            staleList
+              .map((u) => `<b>${esc(u.code)}</b>${u._days === null ? "（从未发货）" : `（${u._days} 天）`}`)
+              .join("、");
+        } else {
+          warnEl.style.display = "none";
+          warnEl.innerHTML = "";
+        }
+
+        const selAll = document.getElementById("uSelAll");
+        if (selAll) selAll.checked = false;
+        body.innerHTML = USERS_CACHE.length
+          ? USERS_CACHE.map((u, i) => {
+              const red = u._stale;
+              const lastTxt = u._days === null ? "从未发货" : `${new Date(u._lastTs).toISOString().slice(0, 10)}（${u._days} 天前）`;
+              return `<tr${red ? ' style="background:#fff7f7"' : ""}>
+                  <td><input type="checkbox" class="uChk" value="${esc(u.code)}" onchange="syncSelAll()" /></td>
                   <td>${i + 1}</td>
-                  <td><b>${esc(u.code)}</b></td>
+                  <td><b${red ? ' style="color:#dc2626"' : ""}>${esc(u.code)}</b>${red ? ' <span title="超过 3 个月未发货">⚠️</span>' : ""}</td>
                   <td>${esc(u.company || "-")}</td>
                   <td>${esc(u.contact || "-")}</td>
                   <td>${esc(u.phone || "-")}</td>
@@ -434,6 +489,7 @@
                   <td>${esc(u.salesperson || "-")}</td>
                   <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${esc(u.address || "")}">${esc(u.address || "-")}</td>
                   <td>${esc(u.createdAt || "-")}</td>
+                  <td${red ? ' style="color:#dc2626;font-weight:600;white-space:nowrap"' : ' style="white-space:nowrap"'}>${lastTxt}${red ? " ⚠" : ""}</td>
                   <td>${u.disabled ? '<span class="badge gray">已停用</span>' : '<span class="badge green">正常</span>'}</td>
                   <td>
                     <a href="javascript:void(0)" style="color:#2e7d32" onclick="resetPwd('${u.code}')">重置密码</a>
@@ -442,14 +498,66 @@
                     &nbsp;
                     <a href="javascript:void(0)" style="color:${u.disabled ? "#16a34a" : "#dc2626"}" onclick="toggleUser('${u.code}',${u.disabled})">${u.disabled ? "启用" : "停用"}</a>
                   </td>
-                </tr>`
-              )
-              .join("")
-          : '<tr><td colspan="12" style="text-align:center;color:#6b7280;padding:30px">还没有客户账号，点击上方「＋ 开通客户账号」</td></tr>';
+                </tr>`;
+            }).join("")
+          : '<tr><td colspan="14" style="text-align:center;color:#6b7280;padding:30px">还没有客户账号，点击上方「＋ 开通客户账号」</td></tr>';
       } catch (e) {
         body.innerHTML = "";
         toast(e.message, "err");
       }
+    }
+
+    /** 表头「全选」 */
+    function toggleSelAll(on) {
+      document.querySelectorAll("#aUsersBody .uChk").forEach((c) => (c.checked = !!on));
+    }
+    /** 单行勾选变化 → 同步表头全选状态 */
+    function syncSelAll() {
+      const all = [...document.querySelectorAll("#aUsersBody .uChk")];
+      const checked = all.filter((c) => c.checked).length;
+      const selAll = document.getElementById("uSelAll");
+      if (selAll) {
+        selAll.checked = all.length > 0 && checked === all.length;
+        selAll.indeterminate = checked > 0 && checked < all.length;
+      }
+    }
+
+    /** 导出客户资料为 Excel（勾选优先；未勾选则导出全部） */
+    function exportUsersExcel() {
+      if (!USERS_CACHE.length) return toast("没有可导出的客户", "err");
+      const checked = [...document.querySelectorAll("#aUsersBody .uChk:checked")].map((c) => c.value);
+      const targets = checked.length ? USERS_CACHE.filter((u) => checked.includes(u.code)) : USERS_CACHE;
+      const head = [
+        "序号", "客户代码", "公司名称", "联系人", "电话", "邮箱", "微信", "业务员",
+        "客户地址", "开通日期", "最近发货日期", "距今天数", "预警", "状态",
+      ];
+      const rows = [head].concat(
+        targets.map((u, i) => [
+          i + 1,
+          u.code || "",
+          u.company || "",
+          u.contact || "",
+          u.phone || "",
+          u.email || "",
+          u.wechat || "",
+          u.salesperson || "",
+          u.address || "",
+          u.createdAt || "",
+          u._days === null ? "" : new Date(u._lastTs).toISOString().slice(0, 10),
+          u._days === null ? "" : u._days,
+          u._stale ? "超过3个月未发货" : "",
+          u.disabled ? "已停用" : "正常",
+        ])
+      );
+      const d = new Date();
+      const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      downloadXlsx(
+        `ALBB客户资料_${ymd}${checked.length ? "_勾选" : "_全部"}.xlsx`,
+        "客户资料",
+        rows,
+        [6, 16, 24, 12, 16, 22, 16, 12, 34, 12, 14, 10, 18, 10]
+      );
+      toast(`已导出 ${targets.length} 位客户`, "ok");
     }
 
     // ---------- 省市区联动选择（快速录入客户地址，参考顺丰下单方式） ----------
