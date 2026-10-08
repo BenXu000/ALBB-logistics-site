@@ -43,15 +43,44 @@ function requireLogin() {
 }
 
 // ---------- 接口封装 ----------
+/** 统一的网络故障提示（含自检办法），避免用户看到生硬的「Failed to fetch」 */
+function netErrorMsg(extra) {
+  return (
+    "网络连接失败，无法访问 ALBB 服务器" +
+    (extra || "") +
+    "。请检查本机网络、关闭 VPN/代理后重试；也可新开标签页打开 " +
+    (window.ALBB_CONFIG ? window.ALBB_CONFIG.API_BASE : "") +
+    "/health 测试连通（显示 ok 即网络正常）。"
+  );
+}
+
 async function api(path, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   const token = getToken();
   if (token) headers["Authorization"] = "Bearer " + token;
-  const resp = await fetch(CFG.API_BASE + path, {
-    method: options.method || "GET",
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  const method = options.method || "GET";
+  const timeoutMs = options.timeout || 60000; // 大文件上传可传 timeout 覆盖
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let resp;
+  try {
+    resp = await fetch(CFG.API_BASE + path, {
+      method,
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: ctrl.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    if (e.name === "AbortError") throw new Error("请求超时（" + Math.round(timeoutMs / 1000) + " 秒），网络较慢或不稳定，请重试");
+    // GET 幂等，网络抖动时自动重试一次；写操作不自动重试（防止重复下单）
+    if (method === "GET" && !options._retried) {
+      await new Promise((r) => setTimeout(r, 800));
+      return api(path, { ...options, _retried: true });
+    }
+    throw new Error(netErrorMsg());
+  }
+  clearTimeout(timer);
   let data;
   try {
     data = await resp.json();
@@ -246,6 +275,7 @@ async function uploadOne(file, onStep = () => {}, opts = {}) {
   }
   const up = await api("/api/upload", {
     method: "POST",
+    timeout: 300000, // 大文件 base64 上传在慢网络下需要更长时间
     body: { name, dataBase64: await blobToBase64(blob), ...(opts.code ? { code: opts.code } : {}) },
   });
   return { key: up.key, name: up.name || name, size: up.size || blob.size };
@@ -324,9 +354,7 @@ function openUserModalBox(innerHtml, width = "460px") {
   mask.setAttribute("data-usermodal", "1");
   mask.style.display = "flex";
   mask.innerHTML = `<div class="modal" style="width:${width}">${innerHtml}</div>`;
-  mask.addEventListener("click", (e) => {
-    if (e.target === mask) mask.remove();
-  });
+  // 注意：不绑定「点击遮罩关闭」——避免切换窗口复制资料回来误点导致填写内容全部丢失，只能通过「取消」按钮关闭
   document.body.appendChild(mask);
   return mask;
 }
