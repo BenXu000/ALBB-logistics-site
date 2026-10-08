@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>管理后台 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css?v=1007" />
+  <link rel="stylesheet" href="css/style.css?v=1008" />
 </head>
 <body>
   <!-- ===== 登录界面 ===== -->
@@ -111,9 +111,9 @@
     <div class="modal" id="userBox" style="width: 560px"></div>
   </div>
 
-  <script src="js/region.js?v=1007"></script>
-  <script src="js/config.js?v=1007"></script>
-  <script src="js/common.js?v=1007"></script>
+  <script src="js/region.js?v=1008"></script>
+  <script src="js/config.js?v=1008"></script>
+  <script src="js/common.js?v=1008"></script>
   <script>
     const TOKEN_KEY = "albb_order_token";
     const USER_KEY = "albb_order_user";
@@ -415,9 +415,7 @@
         toast(e.message, "err");
       }
     }
-    document.getElementById("orderMask").addEventListener("click", (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
-    });
+    // 订单弹窗不绑定「点击遮罩关闭」：误点弹窗外部会导致整单录入内容丢失，只能用「取消」按钮关闭
 
     // ---------- 客户账号 ----------
     let USERS_CACHE = []; // 客户列表（含最近发货/预警计算结果），导出 Excel 用
@@ -752,9 +750,7 @@
         toast(e.message, "err");
       }
     }
-    document.getElementById("userMask").addEventListener("click", (e) => {
-      if (e.target === e.currentTarget) e.currentTarget.style.display = "none";
-    });
+    // 客户账号弹窗不绑定「点击遮罩关闭」：误点弹窗外部会导致填写内容全部丢失，只能用「取消」按钮关闭
   </script>
 </body>
 </html>

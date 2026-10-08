@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>新建订单 · ALBB 客户下单系统</title>
-  <link rel="stylesheet" href="css/style.css?v=1006" />
+  <link rel="stylesheet" href="css/style.css?v=1008" />
 </head>
 <body>
   <div class="layout">
@@ -159,8 +159,8 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=1006"></script>
-  <script src="js/common.js?v=1006"></script>
+  <script src="js/config.js?v=1008"></script>
+  <script src="js/common.js?v=1008"></script>
   <script>
     const user = requireLogin();
     // 管理员登录后即为「代客下单」模式：需先指定客户代码，订单归属该客户
@@ -334,8 +334,8 @@
       const btn = document.getElementById("btnSubmit");
       btn.disabled = true;
       btn.textContent = "提交中…";
+      let attachments = []; // 放在 try 外：断网兜底提示时需要判断已上传了几个附件
       try {
-        let attachments = [];
         const files = packingInput.files;
         if (files && files.length) {
           attachments = await uploadFiles(files, (msg) => {
@@ -396,7 +396,12 @@
           location.href = isAdmin ? "admin.html" : "list.html?channel=" + data.order.channel + "&highlight=" + data.order.id;
         }, 1500);
       } catch (e) {
-        toast(e.message, "err");
+        if (/网络连接失败|请求超时/.test(e.message) && attachments.length) {
+          // 订仓表已上传、创建订单那一步断网：订单可能已建成，先核实再重试，防止重复下单
+          toast("网络中断：订仓表已上传，但订单是否创建成功未知。请先到「订单列表」核实是否已有此单，再决定是否重新提交，避免重复下单。", "err");
+        } else {
+          toast(e.message, "err");
+        }
         btn.disabled = false;
         btn.textContent = "✔ 确 认";
       }
