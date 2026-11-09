@@ -321,6 +321,7 @@
     <section style="padding: 50px 0 30px;" data-page-node-id="uK8wkCM9OZKiBWzJWSkGAo">
         <div class="container" data-page-node-id="OKXOkcTmCm1rwxLJMsrKyB">
             <div class="hero" style="max-width: 800px;" data-page-node-id="nTOn49kFxd0GhwcJtGJfYp">
+                <div style="font-size:0.9rem;color:#5a7a5a;font-weight:600;letter-spacing:0.5px;margin-bottom:8px;">深圳市阿联比伯国际物流有限责任公司</div>
                 <h1 style="font-weight: 800; color: #1e4620;" data-translate="hero_title" data-page-node-id="1AF3gvATgJ9RmW0wP3MgYh">中东专线物流解决方案｜直达沙特与阿联酋</h1>
                 <p style="font-size: 1.2rem; margin: 24px 0 32px; color: #3c6e3c;" data-translate="hero_sub" data-page-node-id="0z1HmbaKveXD5L2bM0ZbI4">专注双清到门服务，覆盖空运、海运及电商履约<br data-page-node-id="KnteCa7o7tGEkYhKrPHA8S">通过发货前预审与全程运踪，提升运输稳定性与可控性</p>
                 <div class="hero-buttons" style="display: flex; gap: 20px; flex-wrap: wrap;" data-page-node-id="k1lxV5dBMvOlWxXrF8hfzo">
@@ -494,6 +495,7 @@
 
 <footer class="footer-copyright" data-page-node-id="tHz2knE4Opje52k5hJR8pF">
     <div class="container" data-page-node-id="cGtBBcrRiy0mYGp4UW0mTQ">
+        <div style="font-size:0.85rem;color:#333;font-weight:600;margin-bottom:6px;letter-spacing:0.5px;">深圳市阿联比伯国际物流有限责任公司</div>
         &copy; 2025 ALBB LOGISTICS COMPANY | <span data-translate="footer_rights" data-page-node-id="GK3on02vYBkgjErCOOCOq5">专业中东物流服务商 · 沙特阿联酋专线</span>
     </div>
 </footer>
@@ -622,6 +624,15 @@
             c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // 17TRACK 全段轨迹入口（覆盖国际段 / 尾程派送；官方免登录直达链接）
+    function link17Track(no, zh) {
+        const url = `https://t.17track.net/${zh ? 'zh-cn' : 'en'}#nums=${encodeURIComponent(no || '')}`;
+        const tip = zh ? '国际段 / 尾程派送轨迹可在 17TRACK 查看：' : 'For international / last-mile legs, view on 17TRACK: ';
+        return `<div style="margin-top:16px; padding-top:12px; border-top:1px dashed #d8e3d8; font-size:0.85rem; color:#6b7c6b;">
+            ${tip}<a href="${url}" target="_blank" rel="noopener" style="color:#005BAC; font-weight:600; text-decoration:underline;">17TRACK ↗</a>
+        </div>`;
+    }
+
     async function handleTrack() {
         const input = document.getElementById('trackingNumber').value.trim();
         const resultDiv = document.getElementById('trackResult');
@@ -679,7 +690,7 @@
                     // 运单已登记但暂无轨迹明细（如 lxcn 只返回目的地）
                     let meta = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
                     meta += `</div><div style="color:#8a6d3b; background:#fdf6e3; padding:8px 14px; border-radius:20px; display:inline-block;">${zh ? '运单已登记，轨迹明细待更新' : 'Registered, track details pending'}</div>`;
-                    resultDiv.innerHTML = meta;
+                    resultDiv.innerHTML = meta + link17Track(data.trackingNo || input, zh);
                 } else {
                     resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
                 }
@@ -706,7 +717,7 @@
                 out += `<div style="background:#f7f9f7; padding:12px; border-radius:8px; font-size:0.85rem; line-height:1.7; white-space:pre-wrap;">${escapeHtml(data.summary)}</div>`;
             }
 
-            resultDiv.innerHTML = out;
+            resultDiv.innerHTML = out + link17Track(data.trackingNo || input, zh);
         } catch (err) {
             resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '网络错误，请稍后重试' : 'Network error, please retry'}</div>`;
         }
