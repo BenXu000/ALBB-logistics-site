@@ -625,6 +625,8 @@
     }
 
     // 17TRACK 全段轨迹入口（覆盖国际段 / 尾程派送；官方免登录直达链接）
+    // 开关：false = 隐藏该入口（当前状态）；需要重新显示时，把下面的 false 改成 true 即可
+    const SHOW_17TRACK_LINK = false;
     function link17Track(no, zh) {
         const url = `https://t.17track.net/${zh ? 'zh-cn' : 'en'}#nums=${encodeURIComponent(no || '')}`;
         const tip = zh ? '国际段 / 尾程派送轨迹可在 17TRACK 查看：' : 'For international / last-mile legs, view on 17TRACK: ';
@@ -690,7 +692,7 @@
                     // 运单已登记但暂无轨迹明细（如 lxcn 只返回目的地）
                     let meta = `<div style="margin-bottom:12px;"><strong>${zh ? '运单号' : 'Tracking No'}: ${escapeHtml(data.trackingNo)}</strong>`;
                     meta += `</div><div style="color:#8a6d3b; background:#fdf6e3; padding:8px 14px; border-radius:20px; display:inline-block;">${zh ? '运单已登记，轨迹明细待更新' : 'Registered, track details pending'}</div>`;
-                    resultDiv.innerHTML = meta + link17Track(data.trackingNo || input, zh);
+                    resultDiv.innerHTML = meta + (SHOW_17TRACK_LINK ? link17Track(data.trackingNo || input, zh) : '');
                 } else {
                     resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '请与客服确认' : 'Please contact customer service to confirm'}</div>`;
                 }
@@ -717,7 +719,7 @@
                 out += `<div style="background:#f7f9f7; padding:12px; border-radius:8px; font-size:0.85rem; line-height:1.7; white-space:pre-wrap;">${escapeHtml(data.summary)}</div>`;
             }
 
-            resultDiv.innerHTML = out + link17Track(data.trackingNo || input, zh);
+            resultDiv.innerHTML = out + (SHOW_17TRACK_LINK ? link17Track(data.trackingNo || input, zh) : '');
         } catch (err) {
             resultDiv.innerHTML = `<div style="color:#c62828;">${zh ? '网络错误，请稍后重试' : 'Network error, please retry'}</div>`;
         }
